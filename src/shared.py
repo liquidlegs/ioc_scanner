@@ -1,4 +1,4 @@
-import os, json, re
+import os, json, re, enum
 from platform import system
 import colorama as cl
 from colorama import Fore, Back, Style
@@ -59,7 +59,7 @@ def load_config() -> str:
   if operating_sys == "Windows":
     delim = "\\"
 
-  filepath = f"{os.getcwd()}{delim}..{delim}config.json"
+  filepath = f"{os.getcwd()}{delim}config.json"
   with open(filepath, "r") as f:
     buffer = f.read()
 

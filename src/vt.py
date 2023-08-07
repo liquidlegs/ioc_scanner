@@ -1,6 +1,6 @@
-from shared import load_config, parse_config_file, VIRUS_TOTAL_KEY
+from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY
+from src.shared import Colour as C
 import requests
-from shared import Colour as C
 import enum, json
 from prettytable.colortable import ColorTable
 
@@ -8,7 +8,7 @@ class VtApiErr(enum.Enum):
   Nan = 0
   InvalidApiKey = 1
   InvalidArgument = 2
-
+  ResourceNotFound = 3
 
 class VirusTotal:
 
@@ -21,6 +21,7 @@ class VirusTotal:
   FORM_HDR = ("content-type", "application/x-www-form-urlencoded")
 
 
+  # Reads the config file and parses the json to retrieve the VT API key.
   def init(self):
     data = load_config()
     key = parse_config_file(data[VIRUS_TOTAL_KEY])
@@ -33,6 +34,7 @@ class VirusTotal:
     self.api_key = ["x-apikey", ""]
 
 
+  # Sends a GET request to the VT API about file attributes relating to a hash.
   def query_file_attributes(self, hash_id: str) -> str:
     url = f"{self.BASE_PTH_FILE_ATT}{hash_id}"
     response = requests.get(url, headers={
@@ -44,6 +46,7 @@ class VirusTotal:
     return text
 
 
+  # Sends a GET request to the VT API about file behaviours relating to a hash.
   def query_file_behaviour(self, hash_id: str) -> str:
     url = f"{self.BASE_PTH_FILE_BEH}/{hash_id}/behaviours?limit={self.n_results}"
     response = requests.get(url, headers={
@@ -55,6 +58,7 @@ class VirusTotal:
     return text
 
 
+  # Sends a GET request to the VT API for information about an ip address.
   def query_ip_attributes(self, ip: str) -> str:
     url = f"{self.BASE_PTH_IP_ATT}{ip}"
     response = requests.get(url, headers={
@@ -66,6 +70,7 @@ class VirusTotal:
     return text
 
 
+  # Sends a POST request to the VT API which scans the url and returns a link to the report.
   def query_url_attributes(self, url: str) -> str:    
     # Prepares the api request to scan the url.
     base_url = self.BASE_PTH_URL_ATT
@@ -83,6 +88,7 @@ class VirusTotal:
     return text
 
 
+  # Makes a GET request to a report for the corresponding url.
   def get_url_report(self, url_response: str) -> str:
     data = json.loads(url_response)
     
@@ -98,25 +104,31 @@ class VirusTotal:
     return text
 
 
+  # Returns the corresponding VT API error via the response from VT.
   def get_error_code(code: str):
     if code.lower() == "wrongcredentialserror":
       return VtApiErr.InvalidApiKey
     if code.lower() == "invalidargumenterror":
       return VtApiErr.InvalidArgument
+    if code.lower() == "notfounderror":
+      return VtApiErr.ResourceNotFound
 
     return VtApiErr.Nan
 
+
+  # Kills the current process if the VT API key is invalid.
   def handle_execution_error(code: VtApiErr):
     if code == VtApiErr.InvalidApiKey:
       exit(1)
 
 
+  # Displays errors returned by the VT API.
   def handle_api_error(data: str, raw_json: bool) -> VtApiErr:
     err = VtApiErr.Nan
     
     if raw_json == True:
       print(data)
-      return err
+      exit(1)
 
     try:
       dt = json.loads(data)
@@ -125,7 +137,7 @@ class VirusTotal:
       if len(error) > 0:
         msg = error["message"]
         err = VirusTotal.get_error_code(error["code"])
-        print(f"{C.red('Error')}: ({C.blue('Virus Total')}) {C.d_yellow(msg)}")
+        print(f"{C.f_red('Error')}: ({C.f_blue('Virus Total')}) {C.fd_yellow(msg)}")
 
         VirusTotal.handle_execution_error(err)
 
@@ -134,6 +146,7 @@ class VirusTotal:
       return err
 
 
+  # Displays basic information and threat scores of each specified IP address to the screen.
   def ip_get_quickscan(ips: list):
     table = ColorTable()
     table.field_names = [
@@ -144,6 +157,9 @@ class VirusTotal:
       C.f_yellow("Undetected"), 
       C.f_yellow("Timeout")
     ]
+
+    if len(ips) < 1:
+      return
 
     for resp in ips:
       ip_addr = resp["data"]["id"]
@@ -159,7 +175,6 @@ class VirusTotal:
       o_mal = malicious
       o_sus = suspicious
       o_harm = harmless
-      o_und = undetected
       o_tm = timeout
 
       if malicious > 0:
@@ -172,7 +187,7 @@ class VirusTotal:
         o_tm = C.f_blue(timeout)
 
       table.add_row([C.f_green(ip_addr), o_mal, o_sus, o_harm, undetected, o_tm])
-    
+
     print(table)
 
 

@@ -1,6 +1,6 @@
 import argparse
-from shared import Colour as C
-from arguments import file_args, url_args, ip_args
+from src.shared import Colour as C
+from src.arguments import file_args, url_args, ip_args
 
 def main():
   parser = argparse.ArgumentParser(description="none")
@@ -17,6 +17,7 @@ def main():
   file_parser.add_argument("-r", "--rawjson", action="store_true")
   
   ip_parser.add_argument("-i", "--ips", action="store")
+  ip_parser.add_argument("-f", "--ip-file", action="store")
   ip_parser.add_argument("--av", action="store_true")
   ip_parser.add_argument("-q", "--quick-scan", action="store_true")
   ip_parser.add_argument("-r", "--rawjson", action="store_true")

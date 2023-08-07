@@ -1,7 +1,7 @@
-from vt import VirusTotal, VtApiErr
-from shared import Colour as C
-from shared import validate_ip, validate_url, is_arg_list, D_LIST
-import json
+from src.vt import VirusTotal, VtApiErr
+from src.shared import Colour as C
+from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF
+import json, os, platform
 
 def file_args(args):
   print("file parser")
@@ -40,6 +40,58 @@ def url_args(args):
     
     VirusTotal.handle_api_error(response)
 
+# Splits ip address received from the commandline and returns them as a list.
+def get_ips_from_cmd(istring: str, delim: str) -> list[str]:
+  out = []
+  temp_ips = istring.split(delim)
+
+  for ip in temp_ips:
+    result = validate_ip(ip)
+    
+    if result != None:
+      out.append(result)
+
+  return out
+
+
+# Splits ip addresses contained in a string, like read from a file and returns it as a list.
+def get_ips_from_list(content: list[str]) -> list[str]:
+  out = []
+  
+  for line in content:
+    ip = validate_ip(line)
+    
+    if ip != None:
+      out.append(ip)
+
+  return out
+
+
+def get_file_contents(filepath: str, delim: str) -> list[str]:
+  path = ""
+  slash = ""
+
+  # Get the correct slash for the correct system
+  if platform.system == "windows":
+    slash = "\\"
+  else:
+    slash = "/"
+  
+  # Fix the path if not absolute
+  if os.path.exists(filepath):
+    if os.path.abspath(filepath) == False:
+      path = f"{os.getcwd}{slash}{filepath}"
+    else:
+      path = filepath
+
+  # Read the file into a buffer and split each line by the specified delimiter
+  buffer = ""
+  with open(path, "r") as f:
+    buffer = f.read()
+
+  output = buffer.split(delim)
+  return output
+
 
 def ip_args(args):
   print("ip parsing")
@@ -51,21 +103,30 @@ def ip_args(args):
   responses = []
   raw_json = args.rawjson
 
-  chk = is_arg_list(args.ips)
-  if chk == True:
-    temp_ips = args.ips.split(D_LIST)
-
-    for ip in temp_ips:
-      result = validate_ip(ip)
-      
+  if args.ips != None:
+    chk = is_arg_list(args.ips)
+    
+    if chk == True:
+      ips.extend(get_ips_from_cmd(args.ips, D_LIST))
+    
+    else:
+      result = validate_ip(args.ips)
       if result != None:
         ips.append(result)
-
-  else:
-    result = validate_ip(args.ips)
-    if result != None:
-      ips.append(result)
   
+  
+  elif args.ip_file != None:
+    content = get_file_contents(args.ip_file, D_CRLF)
+    if len(content) < 2:
+      content = get_file_contents(args.ip_file, D_LF)
+    
+    if len(content) < 2:
+      print(f"{C.f_red('Error')}: unable to split each line by CRLF ('\r\n') or LF ('\n')")
+      return
+    
+    ips.extend(get_ips_from_list(content))
+
+
   if len(ips) < 1:
     print(f"{C.f_red('Error')}: No valid ips to scan")
     return
