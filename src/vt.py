@@ -167,6 +167,21 @@ class VirusTotal:
     return links
 
 
+  def collect_file_responses(self, file_hashes: list, raw_json: bool) -> list:
+    responses = []
+
+    for hash in file_hashes:
+      resp = self.query_file_attributes(hash)
+      err = VirusTotal.handle_api_error(resp, raw_json)
+
+      # Responses that pass error checks will be parsed.
+      if err == VtApiErr.Nan:
+        data = json.loads(resp)
+        responses.append(data)
+
+    return responses
+
+
   def collect_ip_responses(self, ips: list, raw_json: bool) -> list:
     responses = []
 
@@ -279,8 +294,49 @@ class VirusTotal:
 
 
 
-  def hash_get_quickscan(data: str) -> str:
-    pass
+  def file_get_quickscan(hashes: str) -> str:
+    table = ColorTable()
+    table.align = "l"
+    table.field_names = [
+      C.f_yellow("File Hash"), 
+      C.f_yellow("Malicious"), 
+      C.f_yellow("Suspcious"), 
+      C.f_yellow("Harmless"), 
+      C.f_yellow("Undetected"), 
+      C.f_yellow("Timeout")
+    ]
+
+    if len(hashes) < 1:
+      return
+
+    for resp in hashes:
+      ip_addr = resp["data"]["id"]
+      att = resp["data"]["attributes"]
+
+      analysis = att["last_analysis_stats"]
+      malicious = int(analysis["malicious"])
+      suspicious = int(analysis["suspicious"])
+      harmless = int(analysis["harmless"])
+      undetected = int(analysis["undetected"])
+      timeout = int(analysis["timeout"])
+
+      o_mal = malicious
+      o_sus = suspicious
+      o_harm = harmless
+      o_tm = timeout
+
+      if malicious > 0:
+        o_mal = C.b_red(C.f_white(malicious))
+      if suspicious > 0:
+        o_sus = C.fd_yellow(suspicious)
+      if harmless > 0:
+        o_harm = C.f_green(harmless)
+      if timeout > 0:
+        o_tm = C.f_blue(timeout)
+
+      table.add_row([C.f_green(ip_addr), o_mal, o_sus, o_harm, undetected, o_tm])
+
+    print(table)
 
   
 # vt = VirusTotal()

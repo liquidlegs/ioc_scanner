@@ -9,15 +9,57 @@ def file_args(args):
   vt = VirusTotal()
   vt.init()
 
-  if len(args.hashes) > 0:
-    hash = args.hashes
+  file_hashes = []
+  responses = []
+  raw_json = args.raw_json
 
-    response = vt.query_file_attributes(hash)
-    if args.raw_json == True:
-      print(response)
+  if args.hashes != None:
+    chk = is_arg_list(args.hashes)
+    
+    if chk == True:
+      file_hashes.extend(get_items_from_cmd(args.hashes, D_LIST, Item.Hash))
+
+    else:
+      result = validate_ip(args.hashes)
+      if result != None:
+        file_hashes.append(result)
+  
+  
+    if len(file_hashes) < 1:
+      print(f"{C.f_red('Error')}: No valid hashes to scan")
+      return
+    
+    responses.extend(vt.collect_file_responses(file_hashes, raw_json))
+
+    if args.quick_scan == True:
+      VirusTotal.file_get_quickscan(responses)
+
+
+  elif args.hash_file != None:
+    # Attempts to read the text file and split each line with CRLF or LF.
+    content = get_file_contents(args.hash_file, D_CRLF)
+    if len(content) < 2:
+      content = get_file_contents(args.hash_file, D_LF)
+    
+    if len(content) < 2:
+      print(f"{C.f_red('Error')}: unable to split each line by CRLF ('\r\n') or LF ('\n')")
+      return
+    
+    # All ips are added to the ip list.
+    file_hashes.extend(get_items_from_list(content, Item.Hash))
+
+
+    if len(file_hashes) < 1:
+      print(f"{C.f_red('Error')}: No valid hashes to scan")
       return
 
-    VirusTotal.handle_api_error(response)
+    # Ips are sent to the Virus Total API and each response is stored in a list.
+    responses.extend(vt.collect_file_responses(file_hashes, raw_json))
+
+    # Displays basic threat score if user enablled quick_scan.
+    if args.quick_scan == True:
+      VirusTotal.file_get_quickscan(responses)
+
 
 
 def url_args(args):

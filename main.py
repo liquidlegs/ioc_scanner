@@ -10,8 +10,8 @@ def main():
   ip_parser = subparsers.add_parser("ip")
   url_parser = subparsers.add_parser("url")
 
-  file_parser.add_argument("-f", "--file", action="store")
-  file_parser.add_argument("--hashes", action="store")
+  file_parser.add_argument("-H", "--hashes", action="store")
+  file_parser.add_argument("--hash-file", action="store")
   file_parser.add_argument("-a", "--av", action="store_true")
   file_parser.add_argument("-q", "--quick-scan", action="store_true")
   file_parser.add_argument("-r", "--raw-json", action="store_true")
