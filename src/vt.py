@@ -154,15 +154,18 @@ class VirusTotal:
   def collect_url_reports(self, urls: list, raw_json: bool):
     links = []
     
-    for url in urls:
-      resp = self.query_url_attributes(url)
-      err = VirusTotal.handle_api_error(resp, raw_json)
+    try:
+      for url in urls:
+        resp = self.query_url_attributes(url)
+        err = VirusTotal.handle_api_error(resp, raw_json)
 
-      # Responses that pass error checks will be parsed.
-      if err == VtApiErr.Nan:
-        link = VirusTotal.url_get_report_link(json.loads(resp))
-        links.append(link)
+        # Responses that pass error checks will be parsed.
+        if err == VtApiErr.Nan:
+          link = VirusTotal.url_get_report_link(json.loads(resp))
+          links.append(link)
 
+    except json.decoder.JSONDecodeError:
+      pass
 
     return links
 

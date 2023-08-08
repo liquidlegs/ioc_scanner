@@ -1,3 +1,6 @@
 http://www.google.com
 https://threatfox.abuse.ch/ioc/1148923/
 https://stackoverflow.com/questions/3320406/how-to-check-if-a-path-is-absolute-path-or-relative-path-in-a-cross-platform-way
+http://216.128.145.196/~wellseconds/?p=7982
+http://47.99.160.202:50002/match
+http://154.49.137.173/4Db/request0flower/Js832/18/ApiSecure/31Central/PollpythonLocal/8windows/Processortrack/2/apidownloads.php
