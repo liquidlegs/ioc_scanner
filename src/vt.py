@@ -90,12 +90,7 @@ class VirusTotal:
 
   # Makes a GET request to a report for the corresponding url.
   def get_url_report(self, url_response: str) -> str:
-    data = json.loads(url_response)
-    
-    # The next request retrives the data on the url.
-    get_report_url = data["data"]["links"]["self"]
-
-    response = requests.get(get_report_url, headers={
+    response = requests.get(url_response, headers={
       self.JSON_HDR[0]: self.JSON_HDR[1],
       self.api_key[0]: self.api_key[1],
     })
@@ -144,11 +139,53 @@ class VirusTotal:
       return err
     except KeyError:
       return err
+    
+
+  def url_get_report_link(content: bytes) -> str:
+    link = None
+
+    try:
+      link = content["data"]["links"]["self"]
+      return link
+    except KeyError:
+      return link
+  
+
+  def collect_url_reports(self, urls: list, raw_json: bool):
+    links = []
+    
+    for url in urls:
+      resp = self.query_url_attributes(url)
+      err = VirusTotal.handle_api_error(resp, raw_json)
+
+      # Responses that pass error checks will be parsed.
+      if err == VtApiErr.Nan:
+        link = VirusTotal.url_get_report_link(json.loads(resp))
+        links.append(link)
+
+
+    return links
+
+
+  def collect_ip_responses(self, ips: list, raw_json: bool) -> list:
+    responses = []
+
+    for ip in ips:
+      resp = self.query_ip_attributes(ip)
+      err = VirusTotal.handle_api_error(resp, raw_json)
+
+      # Responses that pass error checks will be parsed.
+      if err == VtApiErr.Nan:
+        data = json.loads(resp)
+        responses.append(data)
+
+    return responses
 
 
   # Displays basic information and threat scores of each specified IP address to the screen.
   def ip_get_quickscan(ips: list):
     table = ColorTable()
+    table.align = "l"
     table.field_names = [
       C.f_yellow("IP Address"), 
       C.f_yellow("Malicious"), 
@@ -191,8 +228,55 @@ class VirusTotal:
     print(table)
 
 
-  def url_get_quickscan(data: str) -> str:
-    pass
+  def url_get_quickscan(urls: list):
+    print(f"Starting quickscan with {len(urls)} valid urls")
+
+    table = ColorTable()
+    table.align = "l"
+    table.field_names = [
+      C.f_yellow("URL"), 
+      C.f_yellow("Malicious"), 
+      C.f_yellow("Suspcious"), 
+      C.f_yellow("Harmless"), 
+      C.f_yellow("Undetected"), 
+      C.f_yellow("Timeout")
+    ]
+
+    if len(urls) < 1:
+      return
+
+    for resp in urls:
+      try:
+        url_info = resp["meta"]["url_info"]["url"]
+        att = resp["data"]["attributes"]
+
+        analysis = att["stats"]
+        malicious = int(analysis["malicious"])
+        suspicious = int(analysis["suspicious"])
+        harmless = int(analysis["harmless"])
+        undetected = int(analysis["undetected"])
+        timeout = int(analysis["timeout"])
+
+        o_mal = malicious
+        o_sus = suspicious
+        o_harm = harmless
+        o_tm = timeout
+
+        if malicious > 0:
+          o_mal = C.b_red(C.f_white(malicious))
+        if suspicious > 0:
+          o_sus = C.fd_yellow(suspicious)
+        if harmless > 0:
+          o_harm = C.f_green(harmless)
+        if timeout > 0:
+          o_tm = C.f_blue(timeout)
+
+        table.add_row([C.f_green(url_info), o_mal, o_sus, o_harm, undetected, o_tm])
+      except KeyError:
+        pass
+
+    print(table)
+
 
 
   def hash_get_quickscan(data: str) -> str:

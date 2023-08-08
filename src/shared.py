@@ -1,4 +1,4 @@
-import os, json, re, enum
+import os, json, re, enum, platform
 from platform import system
 import colorama as cl
 from colorama import Fore, Back, Style
@@ -9,6 +9,12 @@ ALIEN_VAULT_KEY = "avl_api_key"
 D_CRLF = "\r\n"
 D_LF = "\n"
 D_LIST = ","
+
+
+class Item(enum.Enum):
+  Ip = 0
+  Hash = 1
+  Url = 2
 
 
 # Function checks that the provided string is a IPv4 address.
@@ -27,6 +33,80 @@ def validate_url(url: str) -> str:
     return out
   except AttributeError:
     return None
+
+
+# Splits ip address received from the commandline and returns them as a list.
+def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
+  out = []
+  temp_items = istring.split(delim)
+
+  if cmd_item == Item.Ip:
+    for ip in temp_items:
+      result = validate_ip(ip)
+      out.append(result)
+
+  
+  elif cmd_item == Item.Hash:
+    out.extend(temp_items)
+  
+  
+  elif cmd_item == Item.Url:
+    for url in temp_items:
+      result = validate_url(url)
+      out.append(result)
+
+  return out
+
+
+# Splits ip addresses contained in a string, like read from a file and returns it as a list.
+def get_items_from_list(content: list[str], file_item: Item) -> list[str]:
+  out = []
+  
+  if file_item == Item.Ip:
+    for line in content:
+      ip = validate_ip(line)
+      out.append(ip)
+
+
+  elif file_item == Item.Url:
+    for line in content:
+      url = validate_url(line)
+      out.append(url)
+
+
+  elif file_item == Item.Hash:
+    for line in content:
+      out.append(line)
+
+
+  return out
+
+
+def get_file_contents(filepath: str, delim: str) -> list[str]:
+  path = ""
+  slash = ""
+
+  # Get the correct slash for the correct system
+  if platform.system == "windows":
+    slash = "\\"
+  else:
+    slash = "/"
+  
+  # Fix the path if not absolute
+  if os.path.exists(filepath):
+    if os.path.abspath(filepath) == False:
+      path = f"{os.getcwd}{slash}{filepath}"
+    else:
+      path = filepath
+
+  # Read the file into a buffer and split each line by the specified delimiter
+  buffer = ""
+  with open(path, "r") as f:
+    buffer = f.read()
+
+  output = buffer.split(delim)
+  return output
+
 
 
 # Function checks if there is a list of items supplied from the commandline seprated by commas
