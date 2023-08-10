@@ -1,8 +1,8 @@
 from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY
-from src.shared import Colour as C
+from src.shared import Colour as C, Item
 import requests
 import enum, json
-from prettytable.colortable import ColorTable
+from prettytable.colortable import ColorTable, Theme
 
 class VtApiErr(enum.Enum):
   Nan = 0
@@ -324,7 +324,7 @@ class VirusTotal:
       return
 
     for resp in hashes:
-      ip_addr = resp["data"]["id"]
+      hash = resp["data"]["id"]
       att = resp["data"]["attributes"]
 
       analysis = att["last_analysis_stats"]
@@ -348,14 +348,183 @@ class VirusTotal:
       if timeout > 0:
         o_tm = C.f_blue(timeout)
 
-      table.add_row([C.f_green(ip_addr), o_mal, o_sus, o_harm, undetected, o_tm])
+      table.add_row([C.f_green(hash), o_mal, o_sus, o_harm, undetected, o_tm])
 
     print(table)
 
   
-# vt = VirusTotal()
-# vt.init_vt()
+  def get_av_detections(data: str, item: Item):
+    table = ColorTable()
+    table.align = "l"
 
-# data = vt.query_ip_attributes("142.251.221.78")
-# text = vt.query_url_attributes("https://www.google.com")
-# text = vt.query_file_behaviour("6712500bb0de148a99ec940160d3d61850e2ce3803adca8f39e9fa8621b8ea6f");
+    if item == Item.Hash:
+      table.field_names = [
+        C.f_yellow("Engine Name"),
+        C.f_yellow("Category"),
+        C.f_yellow("Result"),
+        C.f_yellow("Engine Version"),
+        C.f_yellow("Engine Update"),
+        C.f_yellow("Method")
+      ]
+
+      engine_keys = [
+        "Bkav" ,"Lionic" ,"tehtris" ,"DrWeb" ,"MicroWorld-eScan" "FireEye" ,"CAT-QuickHeal" ,"ALYac" ,"Malwarebytes" ,"Zillya" ,"Sangfor" ,"K7AntiVirus"
+        ,"BitDefender" ,"K7GW" ,"CrowdStrike" ,"BitDefenderTheta" ,"VirIT" ,"Cyren" ,"SymantecMobileInsight" ,"Symantec" ,"Elastic" ,"ESET-NOD32" ,"APEX" 
+        ,"Paloalto" ,"ClamAV" ,"Kaspersky" ,"Alibaba" ,"NANO-Antivirus" ,"ViRobot" ,"Rising" ,"Ad-Aware" ,"Trustlook" ,"TACHYON" ,"Sophos" ,"Comodo"
+        ,"F-Secure" ,"Baidu" ,"VIPRE" ,"TrendMicro" ,"McAfee-GW-Edition" ,"Trapmine" ,"Emsisoft" ,"Ikarus" ,"Avast-Mobile" ,"Jiangmin" ,"Webroot" ,"Google" 
+        ,"Avira" ,"Antiy-AVL" ,"Kingsoft" ,"Microsoft" ,"Gridinsoft" ,"Arcabit" ,"SUPERAntiSpyware" ,"ZoneAlarm" ,"GData" ,"Cynet" ,"BitDefenderFalx" ,"AhnLab-V3" 
+        ,"Acronis" ,"McAfee" ,"MAX" ,"VBA32" ,"Cylance" ,"Panda" ,"Zoner" ,"TrendMicro-HouseCall" ,"Tencent" ,"Yandex" ,"SentinelOne" ,"MaxSecure" ,"Fortinet" ,"AVG" 
+        ,"Cybereason" ,"Avast"
+      ]
+
+      for resp in data:
+        att = resp["data"]["attributes"]
+
+        analysis = att["last_analysis_results"]
+        for index in engine_keys:
+
+          try:
+            av = analysis[index]
+            engine_name = C.f_yellow(av["engine_name"])
+            cat = av["category"]
+            res = av["result"]
+            engine_ver = C.fd_cyan(av["engine_version"])
+            engine_up = C.fd_yellow(av["engine_update"])
+            meth = C.f_magenta(av["method"])
+
+            if cat.lower() == "malicious":
+              cat = C.bd_red(C.f_white(cat))
+            elif cat.lower() == "undetected":
+              cat = C.f_green(cat)
+            elif cat.lower() == "type-unsupported":
+              cat = C.f_blue(cat)
+            elif cat.lower() == "timeout":
+              cat = C.f_blue(cat)
+
+            if res != None:
+              res = C.f_red(res)
+
+            table.add_row([engine_name, cat, res, engine_ver, engine_up, meth])
+          except KeyError:
+            pass
+
+      print(table.get_string(sortby=C.f_yellow("Category")))
+    
+
+    elif item == Item.Ip:
+      table.field_names = [
+        C.f_yellow("Engine Name"),
+        C.f_yellow("Category"),
+        C.f_yellow("Result"),
+        C.f_yellow("Method")
+      ]
+
+      engine_keys = [
+        "Bkav" ,"CMC Threat Intelligence" ,"Snort IP sample list" ,"0xSI_f33d" ,"ViriBack" ,"PhishLabs" "K7AntiVirus" ,"CINS Army" ,"Quttera" ,"PrecisionSec" 
+        ,"OpenPhish" ,"VX Vault" ,"ArcSight Threat Intelligence" ,"Scantitan" ,"AlienVault" ,"Sophos" ,"Phishtank" ,"Cyan" ,"Spam404" ,"SecureBrain" ,"CRDF" 
+        ,"Fortinet" ,"alphaMountain.ai" ,"Lionic" ,"Cyble" ,"Seclookup" ,"Xcitium Verdict Cloud" ,"Google Safebrowsing" ,"SafeToOpen" ,"ADMINUSLabs" ,"ESTsecurity" 
+        ,"Juniper Networks" ,"Heimdal Security" ,"AutoShun" ,"Trustwave" ,"AICC (MONITORAPP)" ,"CyRadar" ,"Dr.Web" ,"Emsisoft" ,"Abusix" ,"Webroot" ,"Avira" 
+        ,"securolytics" ,"Antiy-AVL" ,"AlphaSOC" ,"Acronis" ,"Quick Heal" ,"URLQuery" ,"Viettel Threat Intelligence" ,"DNS8" ,"benkow.cc" ,"EmergingThreats" 
+        ,"Chong Lua Dao" ,"Yandex Safebrowsing" ,"Lumu" ,"zvelo" ,"Kaspersky" ,"Segasec" ,"Sucuri SiteCheck" ,"desenmascara.me" ,"CrowdSec" ,"Cluster25" ,"SOCRadar" 
+        ,"URLhaus" ,"PREBYTES" ,"StopForumSpam" ,"Blueliv" ,"Netcraft" ,"ZeroCERT" ,"Phishing Database" ,"MalwarePatrol" ,"IPsum" ,"Malwared" ,"BitDefender" 
+        ,"GreenSnow" ,"G-Data" ,"VIPRE" ,"SCUMWARE.org" ,"PhishFort" ,"malwares.com URL checker" ,"Forcepoint ThreatSeeker" ,"Criminal IP" ,"Certego" ,"ESET" 
+        ,"Threatsourcing" ,"ThreatHive" ,"Bfore.Ai PreCrime"
+      ]
+
+      for resp in data:
+        att = resp["data"]["attributes"]
+
+        analysis = att["last_analysis_results"]
+        for index in engine_keys:
+
+          try:
+            av = analysis[index]
+            engine_name = C.f_yellow(av["engine_name"])
+            cat = av["category"]
+            res = av["result"]
+            meth = C.f_magenta(av["method"])
+
+            if cat.lower() == "malicious":
+              cat = C.bd_red(C.f_white(cat))
+            elif cat.lower() == "undetected":
+              cat = C.f_green(cat)
+            elif cat.lower() == "harmless":
+              cat = C.f_green(cat)
+            elif cat.lower() == "type-unsupported":
+              cat = C.f_blue(cat)
+            elif cat.lower() == "timeout":
+              cat = C.f_blue(cat)
+
+            if res.lower() == "clean":
+              res = C.f_green(res) 
+            elif res.lower() == "malware":
+              res = C.f_red(res)
+            elif res.lower() == "malicious":
+              res = C.f_red(res)
+            elif res.lower() == "phishing":
+              res = C.fd_yellow(res)
+
+            table.add_row([engine_name, cat, res, meth])
+          except KeyError:
+            pass
+
+      print(table.get_string(sortby=C.f_yellow("Category")))
+
+    
+    elif item == Item.Url:
+      # analysis = data["data"]["attributes"]["results"]
+      table.field_names = [
+        C.f_yellow("Engine Name"),
+        C.f_yellow("Category"),
+        C.f_yellow("Result"),
+        C.f_yellow("Method")
+      ]
+
+      engine_keys = [
+        "Bkav" ,"CMC Threat Intelligence" ,"Snort IP sample list" ,"0xSI_f33d" ,"ViriBack" ,"PhishLabs" ,"K7AntiVirus" ,"CINS Army" ,"Quttera" ,"BlockList" 
+        ,"PrecisionSec" ,"OpenPhish" ,"VX Vault" ,"Feodo Tracker" ,"ADMINUSLabs" ,"Scantitan" ,"AlienVault" ,"Sophos" ,"Phishtank" ,"Cyan" ,"Spam404" ,"SecureBrain" 
+        ,"AutoShun" ,"Rising" ,"Fortinet" ,"alphaMountain.ai" ,"Lionic" ,"Cyble" ,"Seclookup" ,"Xcitium Verdict Cloud" ,"Artists Against 419" ,"Google Safebrowsing" 
+        ,"SafeToOpen" ,"ArcSight Threat Intelligence" ,"ESTsecurity" ,"Juniper Networks" ,"Heimdal Security" ,"CRDF" ,"Trustwave" ,"AICC (MONITORAPP)" ,"CyRadar" 
+        ,"Dr.Web" ,"Emsisoft" ,"Abusix" ,"Webroot" ,"Avira" ,"securolytics" ,"Antiy-AVL" ,"AlphaSOC" ,"Acronis" ,"Quick Heal" ,"URLQuery" ,"Viettel Threat Intelligence" 
+        ,"DNS8" ,"benkow.cc" ,"EmergingThreats" ,"Chong Lua Dao" ,"Yandex Safebrowsing" ,"Lumu" ,"Kaspersky" ,"Sucuri SiteCheck" ,"desenmascara.me" 
+        ,"CrowdSec" ,"Cluster25" ,"SOCRadar" ,"URLhaus" ,"PREBYTES" ,"StopForumSpam" ,"Blueliv" ,"Netcraft" ,"ZeroCERT" ,"Phishing Database" ,"MalwarePatrol" 
+        ,"Sangfor" ,"IPsum" ,"Malwared" ,"BitDefender" ,"GreenSnow" ,"G-Data" ,"VIPRE" ,"SCUMWARE.org" ,"PhishFort" ,"malwares.com URL checker" 
+        ,"Forcepoint ThreatSeeker" ,"Criminal IP" ,"Certego" ,"ESET" ,"Threatsourcing" ,"ThreatHive" ,"Bfore.Ai PreCrime"
+      ]
+
+      for resp in data:
+        att = resp["data"]["attributes"]
+
+        analysis = att["results"]
+        for index in engine_keys:
+
+          try:
+            av = analysis[index]
+            engine_name = C.f_yellow(av["engine_name"])
+            cat = av["category"]
+            res = av["result"]
+            meth = C.f_magenta(av["method"])
+
+            if cat.lower() == "malicious":
+              cat = C.bd_red(C.f_white(cat))
+            elif cat.lower() == "undetected":
+              cat = C.f_green(cat)
+            elif cat.lower() == "harmless":
+              cat = C.f_green(cat)
+            elif cat.lower() == "type-unsupported":
+              cat = C.f_blue(cat)
+            elif cat.lower() == "timeout":
+              cat = C.f_blue(cat)
+
+            if res.lower() == "clean":
+              res = C.f_green(res) 
+            elif res.lower() == "malware":
+              res = C.f_red(res)
+            elif res.lower() == "malicious":
+              res = C.f_red(res)
+
+            table.add_row([engine_name, cat, res, meth])
+          except KeyError:
+            pass
+
+      print(table.get_string(sortby=C.f_yellow("Category")))

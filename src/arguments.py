@@ -23,7 +23,7 @@ def file_args(args):
 
     # IF input is not splitable, the entire linel be added to the file_hashes list.
     else:
-      result = validate_ip(args.hashes)
+      result = args.hashes
       if result != None:
         file_hashes.append(result)
   
@@ -38,6 +38,9 @@ def file_args(args):
     # The data is parsed and threat scores are displayed to the screen.
     if args.quick_scan == True:
       VirusTotal.file_get_quickscan(responses)
+
+    if args.av == True:
+      VirusTotal.get_av_detections(responses, Item.Hash)
   ##########################################################
 
   elif args.hash_file != None:
@@ -64,6 +67,9 @@ def file_args(args):
     # Displays basic threat score if user enabled quick_scan.
     if args.quick_scan == True:
       VirusTotal.file_get_quickscan(responses)
+
+    if args.av == True:
+      VirusTotal.get_av_detections(responses, Item.Hash)
 
 
 
@@ -109,6 +115,9 @@ def url_args(args):
     if args.quick_scan == True:
       VirusTotal.url_get_quickscan(responses)
 
+    if args.av == True:
+      VirusTotal.get_av_detections(responses, Item.Url)
+
 
   elif args.url_file != None:
     # Input is read from a file and a list is returned containing each line.
@@ -143,6 +152,9 @@ def url_args(args):
     if args.quick_scan == True:
       VirusTotal.url_get_quickscan(responses)
 
+    if args.av == True:
+      VirusTotal.get_av_detections(responses, Item.Url)
+
 
 def ip_args(args):
   print("ip parsing")
@@ -176,6 +188,9 @@ def ip_args(args):
     if args.quick_scan == True:
       VirusTotal.ip_get_quickscan(responses)
 
+    if args.av == True:
+      VirusTotal.get_av_detections(responses, Item.Ip)
+
   
   elif args.ip_file != None:
     # Attempts to read the text file and split each line with CRLF or LF.
@@ -201,3 +216,6 @@ def ip_args(args):
     # Displays basic threat score if user enablled quick_scan.
     if args.quick_scan == True:
       VirusTotal.ip_get_quickscan(responses)
+
+    if args.av == True:
+      VirusTotal.get_av_detections(responses, Item.Ip)
