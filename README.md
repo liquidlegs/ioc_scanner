@@ -6,6 +6,8 @@ Ioc Scanner is a simple little that tool that is designed to scan file hashes, u
 
 ![2](assets/3.png)
 
+![3](assets/4.png)
+
 ## Configuration
 To configure ioc_scanner to send requests to the Virus Total API, you must create an account on [VirusTotal.com](https://www.virustotal.com/gui/sign-in) and request an API key.
 
@@ -16,7 +18,8 @@ Please note that all environment variables must begin with a $ sign in the confi
 Here is an example configuration below:
 ```json
 {
-    "vt_api_key": "$VT_KEY"
+    "vt_api_key": "$VT_KEY",
+    "otx_api_key": "$OTX_KEY"
 }
 ```
 

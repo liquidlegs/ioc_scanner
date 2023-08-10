@@ -369,20 +369,12 @@ class VirusTotal:
 
   
   @staticmethod
-  def get_av_detections(data: str, item: Item):
-    table = ColorTable()
-    table.align = "l"
+  def get_av_detections(data: list, item: Item):
+    print(f"Sending {len(data)} items to the VT API backend")
+    
+    table_store = []
 
     if item == Item.Hash:
-      table.field_names = [
-        C.f_yellow("Engine Name"),
-        C.f_yellow("Category"),
-        C.f_yellow("Result"),
-        C.f_yellow("Engine Version"),
-        C.f_yellow("Engine Update"),
-        C.f_yellow("Method")
-      ]
-
       engine_keys = [
         "Bkav" ,"Lionic" ,"tehtris" ,"DrWeb" ,"MicroWorld-eScan" "FireEye" ,"CAT-QuickHeal" ,"ALYac" ,"Malwarebytes" ,"Zillya" ,"Sangfor" ,"K7AntiVirus"
         ,"BitDefender" ,"K7GW" ,"CrowdStrike" ,"BitDefenderTheta" ,"VirIT" ,"Cyren" ,"SymantecMobileInsight" ,"Symantec" ,"Elastic" ,"ESET-NOD32" ,"APEX" 
@@ -394,6 +386,17 @@ class VirusTotal:
       ]
 
       for resp in data:
+        table = ColorTable()
+        table.align = "l"
+        table.field_names = [
+          C.f_yellow("Engine Name"),
+          C.f_yellow("Category"),
+          C.f_yellow("Result"),
+          C.f_yellow("Engine Version"),
+          C.f_yellow("Engine Update"),
+          C.f_yellow("Method")
+        ]
+
         att = resp["data"]["attributes"]
 
         analysis = att["last_analysis_results"]
@@ -424,17 +427,14 @@ class VirusTotal:
           except KeyError:
             pass
 
-      print(table.get_string(sortby=C.f_yellow("Category")))
+        table_store.append(table)
+
+
+      for table in table_store:
+        print(table.get_string(sortby=C.f_yellow("Category")))
     
 
     elif item == Item.Ip:
-      table.field_names = [
-        C.f_yellow("Engine Name"),
-        C.f_yellow("Category"),
-        C.f_yellow("Result"),
-        C.f_yellow("Method")
-      ]
-
       engine_keys = [
         "Bkav" ,"CMC Threat Intelligence" ,"Snort IP sample list" ,"0xSI_f33d" ,"ViriBack" ,"PhishLabs" "K7AntiVirus" ,"CINS Army" ,"Quttera" ,"PrecisionSec" 
         ,"OpenPhish" ,"VX Vault" ,"ArcSight Threat Intelligence" ,"Scantitan" ,"AlienVault" ,"Sophos" ,"Phishtank" ,"Cyan" ,"Spam404" ,"SecureBrain" ,"CRDF" 
@@ -448,6 +448,15 @@ class VirusTotal:
       ]
 
       for resp in data:
+        table = ColorTable()
+        table.align = "l"
+        table.field_names = [
+          C.f_yellow("Engine Name"),
+          C.f_yellow("Category"),
+          C.f_yellow("Result"),
+          C.f_yellow("Method")
+        ]
+
         att = resp["data"]["attributes"]
 
         analysis = att["last_analysis_results"]
@@ -484,11 +493,14 @@ class VirusTotal:
           except KeyError:
             pass
 
-      print(table.get_string(sortby=C.f_yellow("Category")))
+        table_store.append(table)
+
+
+      for table in table_store:
+        print(table.get_string(sortby=C.f_yellow("Category")))
 
     
     elif item == Item.Url:
-      # analysis = data["data"]["attributes"]["results"]
       table.field_names = [
         C.f_yellow("Engine Name"),
         C.f_yellow("Category"),
@@ -509,6 +521,15 @@ class VirusTotal:
       ]
 
       for resp in data:
+        test_table = ColorTable()
+        test_table.align = "l"
+        test_table.field_names = [
+          C.f_yellow("Engine Name"),
+          C.f_yellow("Category"),
+          C.f_yellow("Result"),
+          C.f_yellow("Method")
+        ]
+
         att = resp["data"]["attributes"]
 
         analysis = att["results"]
@@ -539,8 +560,12 @@ class VirusTotal:
             elif res.lower() == "malicious":
               res = C.f_red(res)
 
-            table.add_row([engine_name, cat, res, meth])
+            test_table.add_row([engine_name, cat, res, meth])
           except KeyError:
             pass
 
-      print(table.get_string(sortby=C.f_yellow("Category")))
+        table_store.append(test_table)
+
+
+      for table in table_store:
+        print(table.get_string(sortby=C.f_yellow("Category")))
