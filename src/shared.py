@@ -17,8 +17,8 @@ class Item(enum.Enum):
   Url = 2
 
 
-# Function checks that the provided string is a IPv4 address.
 def validate_ip(ip: str) -> str:
+  '''# Function checks that the provided string is a IPv4 address.'''
   try:
     out = re.search(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", ip).group(0)
     return out
@@ -26,8 +26,8 @@ def validate_ip(ip: str) -> str:
     return None
 
 
-# Function checks if the provided string is a valid url.
 def validate_url(url: str) -> str:
+  '''# Function checks if the provided string is a valid url.'''
   try:
     out = re.search(r"(\w+://\S+\.\w+\S+)", url).group(0)
     return out
@@ -35,8 +35,8 @@ def validate_url(url: str) -> str:
     return None
 
 
-# Splits ip address received from the commandline and returns them as a list.
 def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
+  '''Splits ip address received from the commandline and returns them as a list.'''
   out = []
   temp_items = istring.split(delim)
 
@@ -58,8 +58,8 @@ def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
   return out
 
 
-# Splits ip addresses contained in a string, like read from a file and returns it as a list.
 def get_items_from_list(content: list[str], file_item: Item) -> list[str]:
+  '''Splits ip addresses contained in a string, like read from a file and returns it as a list.'''
   out = []
   
   if file_item == Item.Ip:
@@ -83,6 +83,7 @@ def get_items_from_list(content: list[str], file_item: Item) -> list[str]:
 
 
 def get_file_contents(filepath: str, delim: str) -> list[str]:
+  '''Reads the contents of a file and returns it as a list of lines.'''
   path = ""
   slash = ""
 
@@ -108,9 +109,8 @@ def get_file_contents(filepath: str, delim: str) -> list[str]:
   return output
 
 
-
-# Function checks if there is a list of items supplied from the commandline seprated by commas
 def is_arg_list(string: str) -> bool:
+  '''Function checks if there is a list of items supplied from the commandline seprated by commas'''
   chk = string.split(D_LIST)
   
   if len(chk) > 1:
@@ -119,8 +119,8 @@ def is_arg_list(string: str) -> bool:
     return False
 
 
-# Function checks what the delimter is between in line in a file and returns it.
 def get_file_delim(data: str) -> str:
+  '''Function checks what the delimter is between in line in a file and returns it.'''
   chk = data.split(D_LF)
   if len(chk) > 1:
     return D_LF
@@ -130,8 +130,8 @@ def get_file_delim(data: str) -> str:
     return D_CRLF
 
 
-# Function loads the config file from the root of the project directory.
 def load_config() -> str:
+  '''Function loads the config file from the root of the project directory.'''
   buffer = ""
   delim = "/"
 
@@ -147,9 +147,9 @@ def load_config() -> str:
   return data
 
 
-# Makes sure that there is a value in the config file for specified key.
-# Function will return expanded environment variable for any values that begin with '$'
 def parse_config_file(data: str) -> str:
+  '''Makes sure that there is a value in the config file for specified key.
+     Function will return expanded environment variable for any values that begin with \'$\'.'''
   dt = data
   output = ""
 
@@ -167,6 +167,7 @@ def parse_config_file(data: str) -> str:
 
 
 class Colour:
+  '''Returns the colour of your desires'''
 
   def f_blue(text: str) -> str:
     return f"{Fore.BLUE}{Style.BRIGHT}{text}{Fore.RESET}{Style.NORMAL}"
