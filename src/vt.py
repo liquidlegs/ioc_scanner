@@ -2,7 +2,7 @@ from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY
 from src.shared import Colour as C, Item
 import requests
 import enum, json
-from prettytable.colortable import ColorTable, Theme
+from prettytable.colortable import ColorTable
 
 class VtApiErr(enum.Enum):
   Nan = 0
@@ -20,7 +20,7 @@ class VirusTotal:
   JSON_HDR = ("accept", "application/json")
   FORM_HDR = ("content-type", "application/x-www-form-urlencoded")
 
-
+  @classmethod
   def init(self):
     '''Reads the config file and parses the json to retrieve the VT API key.'''
     data = load_config()
@@ -28,6 +28,7 @@ class VirusTotal:
     self.api_key[1] = key
 
 
+  @classmethod
   def __init__(self, debug=False, vt_objects=10, raw_json=False):
     self.debug = debug
     self.n_results = vt_objects
@@ -35,6 +36,7 @@ class VirusTotal:
     self.api_key = ["x-apikey", ""]
 
 
+  @classmethod
   def query_file_attributes(self, hash_id: str) -> str:
     '''Sends a GET request to the VT API about file attributes relating to a hash.'''
     url = f"{self.BASE_PTH_FILE_ATT}{hash_id}"
@@ -47,6 +49,7 @@ class VirusTotal:
     return text
 
 
+  @classmethod
   def query_file_behaviour(self, hash_id: str) -> str:
     '''Sends a GET request to the VT API about file behaviours relating to a hash.'''
     url = f"{self.BASE_PTH_FILE_BEH}/{hash_id}/behaviours?limit={self.n_results}"
@@ -59,6 +62,7 @@ class VirusTotal:
     return text
 
 
+  @classmethod
   def query_ip_attributes(self, ip: str) -> str:
     '''Sends a GET request to the VT API for information about an ip address.'''
     url = f"{self.BASE_PTH_IP_ATT}{ip}"
@@ -71,6 +75,7 @@ class VirusTotal:
     return text
 
 
+  @classmethod
   def query_url_attributes(self, url: str) -> str:    
     '''Sends a POST request to the VT API which scans the url and returns a link to the report.'''
     # Prepares the api request to scan the url.
@@ -89,6 +94,7 @@ class VirusTotal:
     return text
 
 
+  @classmethod
   def get_url_report(self, url_response: str) -> str:
     '''# Makes a GET request to a report for the corresponding url.'''
     response = requests.get(url_response, headers={
@@ -100,6 +106,7 @@ class VirusTotal:
     return text
 
 
+  @staticmethod
   def get_error_code(code: str):
     '''# Returns the corresponding VT API error via the response from VT'''
     if code.lower() == "wrongcredentialserror":
@@ -112,12 +119,14 @@ class VirusTotal:
     return VtApiErr.Nan
 
 
+  @staticmethod
   def handle_execution_error(code: VtApiErr):
     '''# Kills the current process if the VT API key is invalid.'''
     if code == VtApiErr.InvalidApiKey:
       exit(1)
 
 
+  @classmethod
   def handle_api_error(self, data: str) -> VtApiErr:
     '''# Displays errors returned by the VT API.'''
     err = VtApiErr.Nan
@@ -142,6 +151,7 @@ class VirusTotal:
       return err
     
 
+  @staticmethod
   def url_get_report_link(content: bytes) -> str:
     '''Extracts the url link from to the url report from the VT json response.'''
     link = None
@@ -153,6 +163,7 @@ class VirusTotal:
       return link
   
 
+  @classmethod
   def collect_url_reports(self, urls: list):
     '''Sends each specified url to the VT API backend and retrieves the link to the url report.'''
     links = []
@@ -173,6 +184,7 @@ class VirusTotal:
     return links
 
 
+  @classmethod
   def collect_file_responses(self, file_hashes: list) -> list:
     '''Sends a number of GET requests from a list of file hashes and collects the json responses.'''
     responses = []
@@ -189,6 +201,7 @@ class VirusTotal:
     return responses
 
 
+  @classmethod
   def collect_ip_responses(self, ips: list) -> list:
     '''Sends a number of GET requests from a list of IP addresses and collects the json responses'''
     responses = []
@@ -205,6 +218,7 @@ class VirusTotal:
     return responses
 
 
+  @staticmethod
   def ip_get_quickscan(ips: list):
     '''Displays basic information and threat scores of each specified IP address to the screen.'''
     print(f"Starting quickscan with {len(ips)} valid IPs")
@@ -253,6 +267,7 @@ class VirusTotal:
     print(table)
 
 
+  @staticmethod
   def url_get_quickscan(urls: list):
     '''Displays basic information and threat scores of each specified URL to the screen.'''
     print(f"Starting quickscan with {len(urls)} valid urls")
@@ -304,7 +319,7 @@ class VirusTotal:
     print(table)
 
 
-
+  @staticmethod
   def file_get_quickscan(hashes: str) -> str:
     '''Displays basic information and threat scores of each specified file hash to the screen.'''
     print(f"Starting quickscan with {len(hashes)} valid file hashes")
@@ -353,6 +368,7 @@ class VirusTotal:
     print(table)
 
   
+  @staticmethod
   def get_av_detections(data: str, item: Item):
     table = ColorTable()
     table.align = "l"

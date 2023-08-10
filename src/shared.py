@@ -5,7 +5,7 @@ from colorama import Fore, Back, Style
 cl.init(autoreset=True)
 
 VIRUS_TOTAL_KEY = "vt_api_key"
-ALIEN_VAULT_KEY = "avl_api_key"
+ALIEN_VAULT_KEY = "otx_api_key"
 D_CRLF = "\r\n"
 D_LF = "\n"
 D_LIST = ","

@@ -1,3 +1,4 @@
 {
-    "vt_api_key": "$VT_KEY"
+    "vt_api_key": "$VT_KEY",
+    "otx_key": "$OTX_KEY"
 }
