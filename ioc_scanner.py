@@ -1,10 +1,12 @@
 import argparse
 from src.shared import Colour as C
-from src.arguments import file_args, url_args, ip_args
+from src.arguments import file_args, url_args, ip_args, test_connection
 
 def main():
   parser = argparse.ArgumentParser(description="none")
-  subparsers = parser.add_subparsers(dest="command", help="query the VT api information about files, hashes, IPs and URLs", required=True)
+  parser.add_argument("-t", "--test", action="store_true", help="Test API keys are valid and that we can communicate with outside services")
+  parser.add_argument("-o", "--otx-debug", action="store_true", help="Shows raw json response from AlienVault")
+  subparsers = parser.add_subparsers(dest="command", help="query the VT api information about files, hashes, IPs and URLs", required=False)
 
   file_parser = subparsers.add_parser("file")
   ip_parser = subparsers.add_parser("ip")
@@ -35,6 +37,8 @@ def main():
     url_args(args)
   elif args.command == "ip":
     ip_args(args)
+  elif args.test == True:
+    test_connection(args)
 
   pass
 

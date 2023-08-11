@@ -1,7 +1,38 @@
 from src.vt import VirusTotal, VtApiErr
+from src.avt import AlienVault, Ip, Indicator
 from src.shared import Colour as C, get_file_contents, get_items_from_list
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd
 import json
+
+
+def test_connection(args):
+  '''Test communication between each service to determine if configured correctly.'''
+  vt = VirusTotal()
+  vt.init()
+  if vt.is_apikey_loaded() == True:
+    print(f"{C.f_blue('Virus Total')} key {C.f_green('successfully')} loaded")
+
+  out = vt.query_ip_attributes("192.168.1.1")
+  err = vt.handle_api_error(out)
+
+  if err == VtApiErr.Nan:
+    print(C.f_green("Virus Total is correctly configured"))
+
+  otx = AlienVault()
+  otx.init()
+  print(C.f_red("AlientVault is not yet implemented"))
+  
+  if otx.is_apikey_loaded() == True:
+    print(f"{C.f_blue('AlienVault')} key {C.f_green('successfully')} loaded")
+    print(f"{C.f_yellow('Info')}: Alient API keys are only required viewing OTX premium content via the AlienVault Labs Threat Intelligence Subscription")
+
+  otx_response = otx.get_ip_indicators(Ip.V4, "169.239.129.108", Indicator.general)
+  otx_json = json.loads(otx_response)
+  out = json.dumps(otx_json, indent=2)
+  
+  if args.otx_debug == True:
+    print(out)
+
 
 def file_args(args):
   print("file parser")

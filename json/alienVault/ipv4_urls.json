@@ -1,0 +1,190 @@
+{
+  "url_list": [
+    {
+      "url": "http://status.rapidssl.com/mfewtzbnmeswstajbgurdgmcgguab",
+      "date": "2023-08-10T22:40:38",
+      "domain": "rapidssl.com",
+      "hostname": "status.rapidssl.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 200
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 200,
+      "gsb": [],
+      "encoded": "http%3A//status.rapidssl.com/mfewtzbnmeswstajbgurdgmcgguab"
+    },
+    {
+      "url": "http://cacerts.digicert.com/DigiCertM",
+      "date": "2023-08-10T09:32:16",
+      "domain": "digicert.com",
+      "hostname": "cacerts.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 404
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 404,
+      "gsb": [],
+      "encoded": "http%3A//cacerts.digicert.com/DigiCertM"
+    },
+    {
+      "url": "http://crl3.digicert.com/DigiCertTrustedG4CodeSigningR",
+      "date": "2023-08-10T09:31:19",
+      "domain": "digicert.com",
+      "hostname": "crl3.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 404
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 404,
+      "gsb": [],
+      "encoded": "http%3A//crl3.digicert.com/DigiCertTrustedG4CodeSigningR"
+    },
+    {
+      "url": "http://cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStamp",
+      "date": "2023-08-10T09:31:19",
+      "domain": "digicert.com",
+      "hostname": "cacerts.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 404
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 404,
+      "gsb": [],
+      "encoded": "http%3A//cacerts.digicert.com/DigiCertTrustedG4RSA4096SHA256TimeStamp"
+    },
+    {
+      "url": "http://cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA40e",
+      "date": "2023-08-10T09:31:18",
+      "domain": "digicert.com",
+      "hostname": "cacerts.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 404
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 404,
+      "gsb": [],
+      "encoded": "http%3A//cacerts.digicert.com/DigiCertTrustedG4CodeSigningRSA40e"
+    },
+    {
+      "url": "http://crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1F",
+      "date": "2023-08-10T09:31:18",
+      "domain": "digicert.com",
+      "hostname": "crl4.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 404
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 404,
+      "gsb": [],
+      "encoded": "http%3A//crl4.digicert.com/DigiCertTrustedG4CodeSigningRSA4096SHA3842021CA1F"
+    },
+    {
+      "url": "http://ocsp.digicert.com/MFEwTzBNMEswSTAJBgUrDgMCGgUABBTPJvUY+sl+j4yzQuAcL2oQno5fCgQUUWj/kK8CB3U8zNllZGKiErhZcjsCEAnBGS4gd3IcsVD41k4MAn0=",
+      "date": "2023-08-08T03:15:03",
+      "domain": "digicert.com",
+      "hostname": "ocsp.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 200
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 200,
+      "gsb": [],
+      "encoded": "http%3A//ocsp.digicert.com/MFEwTzBNMEswSTAJBgUrDgMCGgUABBTPJvUY%2Bsl%2Bj4yzQuAcL2oQno5fCgQUUWj/kK8CB3U8zNllZGKiErhZcjsCEAnBGS4gd3IcsVD41k4MAn0%3D"
+    },
+    {
+      "url": "http://crl3.digicert.com/DigiCertGlobalG3TLSECCSHA3842020CA1-2.crl",
+      "date": "2023-08-04T07:00:38",
+      "domain": "digicert.com",
+      "hostname": "crl3.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 200
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 200,
+      "gsb": [],
+      "encoded": "http%3A//crl3.digicert.com/DigiCertGlobalG3TLSECCSHA3842020CA1-2.crl"
+    },
+    {
+      "url": "http://crl3.digicert.com/DigiCertTrustedG4RSA4096SHA254TimeStampingCA.Crl0",
+      "date": "2023-08-03T20:50:07",
+      "domain": "digicert.com",
+      "hostname": "crl3.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 404
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 404,
+      "gsb": [],
+      "encoded": "http%3A//crl3.digicert.com/DigiCertTrustedG4RSA4096SHA254TimeStampingCA.Crl0"
+    },
+    {
+      "url": "http://ocsp.digicert.com/MFEwTzBNMEswSTAJBgUrDgMCGgUABBSRXerF0eFeSWRripTgTkcJWMm7iQQUaDfg67Y7+F8Rhvv+YXsIiGX0TkICEAZJDkd4gRaz/k0AR2KFy2M=",
+      "date": "2023-08-02T18:01:53",
+      "domain": "digicert.com",
+      "hostname": "ocsp.digicert.com",
+      "result": {
+        "urlworker": {
+          "ip": "192.229.211.108",
+          "http_code": 200
+        },
+        "safebrowsing": {
+          "matches": []
+        }
+      },
+      "httpcode": 200,
+      "gsb": [],
+      "encoded": "http%3A//ocsp.digicert.com/MFEwTzBNMEswSTAJBgUrDgMCGgUABBSRXerF0eFeSWRripTgTkcJWMm7iQQUaDfg67Y7%2BF8Rhvv%2BYXsIiGX0TkICEAZJDkd4gRaz/k0AR2KFy2M%3D"
+    }
+  ],
+  "page_num": 1,
+  "limit": 10,
+  "paged": true,
+  "has_next": true,
+  "full_size": 329,
+  "actual_size": 329
+}

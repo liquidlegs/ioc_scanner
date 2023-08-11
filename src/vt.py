@@ -3,6 +3,7 @@ from src.shared import Colour as C, Item
 import requests
 import enum, json
 from prettytable.colortable import ColorTable
+import textwrap
 
 class VtApiErr(enum.Enum):
   Nan = 0
@@ -26,6 +27,15 @@ class VirusTotal:
     data = load_config()
     key = parse_config_file(data[VIRUS_TOTAL_KEY])
     self.api_key[1] = key
+
+
+  @classmethod
+  def is_apikey_loaded(self) -> bool:
+    length = len(self.api_key)
+    if length > 0:
+      return True
+    else:
+      return False
 
 
   @classmethod

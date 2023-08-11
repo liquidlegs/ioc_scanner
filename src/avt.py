@@ -4,6 +4,9 @@ import requests
 import enum, json
 from prettytable.colortable import ColorTable
 
+# useful documentation for OTX headers
+# https://gist.github.com/chrisdoman/3cccfbf6f07cf007271bec583305eb92
+
 class Indicator(enum.Enum):
   general = 0
   reputation = 1
@@ -11,20 +14,34 @@ class Indicator(enum.Enum):
   malware = 3
   url_list = 4
   passive_dns = 5
-  whois = 6
-  analysis = 7
+  http_scans = 6
+  nids_list = 7
+  whois = 8
+  analysis = 9
+
+
+class OtxApiErr(enum.Enum):
+  NotFound = 0
+  DataButEmpty = 1
+  Null = 2
+  SubRequired = 3
+
+
+class Ip(enum.Enum):
+  V4 = 0
+  V6 = 1
 
 
 class AlienVault:
 
-  IND_IPv4 = "/api/v1/indicators/IPv4/{ip}/{section}"
-  IND_IPv6 = "/api/v1/indicators/IPv6/{ip}/{section}"
-  IND_DOMAIN = "/api/v1/indicators/domain/{domain}/{section}"
-  IND_HOSTNAME = "/api/v1/indicators/hostname/{hostname}/{section}"
-  IND_FILEHASH = "/api/v1/indicators/file/{file_hash}/{section}"
-  IND_URL = "/api/v1/indicators/url/{url}/{section}"
-  IND_NIDS = "/api/v1/indicators/nids/{nids}/{section}"
-  IND_CORRELATION = "/api/v1/indicators/correlation-rule/{correlationrule}/{section}"
+  IND_IPv4 = "https://otx.alienvault.com/api/v1/indicators/IPv4/{ip}/{section}"
+  IND_IPv6 = "https://otx.alienvault.com/api/v1/indicators/IPv6/{ip}/{section}"
+  IND_DOMAIN = "https://otx.alienvault.com/api/v1/indicators/domain/{domain}/{section}"
+  IND_HOSTNAME = "https://otx.alienvault.com/api/v1/indicators/hostname/{hostname}/{section}"
+  IND_FILEHASH = "https://otx.alienvault.com/api/v1/indicators/file/{file_hash}/{section}"
+  IND_URL = "https://otx.alienvault.com/api/v1/indicators/url/{url}/{section}"
+  IND_NIDS = "https://otx.alienvault.com/api/v1/indicators/nids/{nids}/{section}"
+  IND_CORRELATION = "https://otx.alienvault.com/api/v1/indicators/correlation-rule/{correlationrule}/{section}"
 
   JSON_HDR = ("accept", "application/json")
   FORM_HDR = ("content-type", "application/x-www-form-urlencoded")
@@ -39,14 +56,62 @@ class AlienVault:
 
 
   @classmethod
+  def is_apikey_loaded(self) -> bool:
+    length = len(self.api_key)
+    if length > 0:
+      return True
+    else:
+      return False
+
+
+  @classmethod
   def __init__(self, debug=False, raw_json=False):
     self.debug = debug
     self.raw_json = raw_json
-    self.api_key = ["x-apikey", ""]
+    self.api_key = ["X-OTX-API-KEY", ""]
 
 
-  def get_ip_indicators():
+  def get_ip_quickscan():
     pass
+
+
+  def handle_otx_error():
+    pass
+
+
+  def get_ip_indicators(self, ip_type: Ip, data: str, ind: Indicator):
+    base_url = ""
+    
+    if ip_type == Ip.V4:
+      base_url = self.IND_IPv4.replace("{ip}", data)
+    elif ip_type == Ip.V6:
+      base_url = self.IND_IPv4.replace("{ip}", data)
+
+    if ind == Indicator.general:
+      base_url = base_url.replace("{section}", "general")
+    elif ind == Indicator.reputation:
+      base_url = base_url.replace("{section}", "reputation")
+    elif ind == Indicator.geo:
+      base_url = base_url.replace("{section}", "geo")
+    elif ind == Indicator.malware:
+      base_url = base_url.replace("{section}", "malware")
+    elif ind == Indicator.url_list:
+      base_url = base_url.replace("{section}", "url_list")
+    elif ind == Indicator.passive_dns:
+      base_url = base_url.replace("{section}", "passive_dns")
+    elif ind == Indicator.http_scans:
+      base_url = base_url.replace("{section}", "http_scans")
+    elif ind == Indicator.nids_list:
+      base_url = base_url.replace("{section}", "nids_list")
+
+    print(f"url: {base_url}")
+    req = requests.get(base_url, headers={
+      self.JSON_HDR[0]: self.JSON_HDR[1],
+      self.api_key[0]: self.api_key[1]
+    })
+
+    text = req.text
+    return text
 
 
   def get_domain_indictors():
