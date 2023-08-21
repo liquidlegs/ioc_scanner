@@ -513,13 +513,6 @@ class VirusTotal:
 
     
     elif item == Item.Url:
-      table.field_names = [
-        C.f_yellow("Engine Name"),
-        C.f_yellow("Category"),
-        C.f_yellow("Result"),
-        C.f_yellow("Method")
-      ]
-
       engine_keys = [
         "Bkav" ,"CMC Threat Intelligence" ,"Snort IP sample list" ,"0xSI_f33d" ,"ViriBack" ,"PhishLabs" ,"K7AntiVirus" ,"CINS Army" ,"Quttera" ,"BlockList" 
         ,"PrecisionSec" ,"OpenPhish" ,"VX Vault" ,"Feodo Tracker" ,"ADMINUSLabs" ,"Scantitan" ,"AlienVault" ,"Sophos" ,"Phishtank" ,"Cyan" ,"Spam404" ,"SecureBrain" 
