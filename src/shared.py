@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os, json, re, enum, platform
 from platform import system
 import colorama as cl
