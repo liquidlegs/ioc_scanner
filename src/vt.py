@@ -26,12 +26,14 @@ class VirusTotal:
     '''Reads the config file and parses the json to retrieve the VT API key.'''
     data = load_config()
     key = parse_config_file(data[VIRUS_TOTAL_KEY])
-    self.api_key[1] = key
+
+    if key != None:
+      self.api_key[1] = key
 
 
   @classmethod
   def is_apikey_loaded(self) -> bool:
-    length = len(self.api_key)
+    length = len(self.api_key[1])
     if length > 0:
       return True
     else:

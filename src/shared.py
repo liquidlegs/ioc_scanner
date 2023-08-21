@@ -153,10 +153,16 @@ def parse_config_file(data: str) -> str:
   dt = data
   output = ""
 
+  if len(data) == 0:
+    return None
+
   if dt[0] == '$':
     env = dt[1:len(dt)]
     expanded_env = os.environ.get(env)
     
+    if expanded_env == None:
+      return None
+
     if len(expanded_env) > 0:
       output += expanded_env
 

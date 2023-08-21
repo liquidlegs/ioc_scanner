@@ -5,6 +5,17 @@ from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D
 import json
 
 
+def check_flags(args):
+  out = 0
+
+  if args.av == True:
+    out += 1
+  if args.raw_json == True:
+    out += 1
+  
+  return out
+
+
 def test_connection(args):
   '''Test communication between each service to determine if configured correctly.'''
   vt = VirusTotal()
@@ -34,7 +45,7 @@ def test_connection(args):
     print(out)
 
 
-def file_args(args):
+def hash_args(args):
   print("file parser")
 
   vt = VirusTotal(raw_json=args.raw_json)
@@ -66,12 +77,11 @@ def file_args(args):
     # The VT API is called and the response is collected
     responses.extend(vt.collect_file_responses(file_hashes))
 
-    # The data is parsed and threat scores are displayed to the screen.
-    if args.quick_scan == True:
-      VirusTotal.file_get_quickscan(responses)
-
     if args.av == True:
       VirusTotal.get_av_detections(responses, Item.Hash)
+
+    if check_flags(args) < 1:
+      VirusTotal.file_get_quickscan(responses)
   ##########################################################
 
   elif args.hash_file != None:
@@ -95,13 +105,12 @@ def file_args(args):
     # Hashes are sent to the Virus Total API and each response is stored in a list.
     responses.extend(vt.collect_file_responses(file_hashes))
 
-    # Displays basic threat score if user enabled quick_scan.
-    if args.quick_scan == True:
-      VirusTotal.file_get_quickscan(responses)
-
     if args.av == True:
       VirusTotal.get_av_detections(responses, Item.Hash)
 
+    # Displays basic threat score if user enabled quick_scan.
+    if check_flags(args) < 1:
+      VirusTotal.file_get_quickscan(responses)
 
 
 def url_args(args):
@@ -143,11 +152,12 @@ def url_args(args):
         data = json.loads(resp)
         responses.append(data)
 
-    if args.quick_scan == True:
-      VirusTotal.url_get_quickscan(responses)
 
     if args.av == True:
       VirusTotal.get_av_detections(responses, Item.Url)
+
+    if check_flags(args) < 1:
+      VirusTotal.url_get_quickscan(responses)
 
 
   elif args.url_file != None:
@@ -179,12 +189,13 @@ def url_args(args):
         data = json.loads(resp)
         responses.append(data)
 
-    # Displays basic threat score if user enablled quick_scan.
-    if args.quick_scan == True:
-      VirusTotal.url_get_quickscan(responses)
 
     if args.av == True:
       VirusTotal.get_av_detections(responses, Item.Url)
+
+    # Displays basic threat score if user enablled quick_scan.
+    if check_flags(args) < 1:
+      VirusTotal.url_get_quickscan(responses)
 
 
 def ip_args(args):
@@ -216,11 +227,11 @@ def ip_args(args):
     
     responses.extend(vt.collect_ip_responses(ips))
 
-    if args.quick_scan == True:
-      VirusTotal.ip_get_quickscan(responses)
-
     if args.av == True:
       VirusTotal.get_av_detections(responses, Item.Ip)
+
+    if check_flags(args) < 1:
+      VirusTotal.ip_get_quickscan(responses)
 
   
   elif args.ip_file != None:
@@ -244,9 +255,8 @@ def ip_args(args):
     # Ips are sent to the Virus Total API and each response is stored in a list.
     responses.extend(vt.collect_ip_responses(ips))
 
-    # Displays basic threat score if user enablled quick_scan.
-    if args.quick_scan == True:
-      VirusTotal.ip_get_quickscan(responses)
-
     if args.av == True:
       VirusTotal.get_av_detections(responses, Item.Ip)
+
+    if check_flags(args) < 1:
+      VirusTotal.ip_get_quickscan(responses)
