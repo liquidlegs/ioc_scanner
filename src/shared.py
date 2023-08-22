@@ -32,6 +32,16 @@ def validate_url(url: str) -> str:
     out = re.search(r"(\w+://\S+\.\w+\S+)", url).group(0)
     return out
   except AttributeError:
+    domain = validate_domain(url)
+    return domain
+
+
+def validate_domain(domain: str) -> str:
+  '''# Function checks if the provided string is a valid domain.'''
+  try:
+    out = re.search(r"(\S+\.\w{2,})", domain).group(0)
+    return out
+  except AttributeError:
     return None
 
 

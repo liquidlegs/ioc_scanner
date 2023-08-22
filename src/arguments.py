@@ -172,7 +172,7 @@ def url_args(args):
     
     # The process here is the same as the comment above.
     # Only the method to get the data in script is different.
-    urls.extend(get_items_from_list(content, Item.Url))  
+    urls.extend(get_items_from_list(content, Item.Url))
 
     if len(urls) < 1:
       print(f"{C.f_red('Error')}: No valid urls to scan")
