@@ -6,6 +6,7 @@ import json
 
 
 def check_flags(args):
+  '''Function determines if global flags have been specified. If not, behaviour defaults to displaying the quickscan for the corresponding ioc'''
   out = 0
 
   if args.av == True:
@@ -18,7 +19,7 @@ def check_flags(args):
 
 def test_connection(args):
   '''Test communication between each service to determine if configured correctly.'''
-  vt = VirusTotal()
+  vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
   vt.init()
   if vt.is_apikey_loaded() == True:
     print(f"{C.f_blue('Virus Total')} key {C.f_green('successfully')} loaded")
@@ -57,16 +58,16 @@ def hash_args(args):
 
   ##########################################################
   # Code block handles file hashes entered in from the commandline.
-  if args.hashes != None:
+  if args.iocs != None:
     # First few lines check if the hash(es) are splitable and adds them to the file_hashes list.
-    chk = is_arg_list(args.hashes)
+    chk = is_arg_list(args.iocs)
     
     if chk == True:
-      file_hashes.extend(get_items_from_cmd(args.hashes, D_LIST, Item.Hash))
+      file_hashes.extend(get_items_from_cmd(args.iocs, D_LIST, Item.Hash))
 
     # IF input is not splitable, the entire linel be added to the file_hashes list.
     else:
-      result = args.hashes
+      result = args.iocs
       if result != None:
         file_hashes.append(result)
   
@@ -125,16 +126,16 @@ def url_args(args):
   links = []
   responses = []
 
-  if args.urls != None:
+  if args.iocs != None:
     # First few lines check if the url(s) are splitable and adds them to the urls list.
-    chk = is_arg_list(args.urls)
+    chk = is_arg_list(args.iocs)
 
     if chk == True:
-      urls.extend(get_items_from_cmd(args.urls, D_LIST, Item.Url))
+      urls.extend(get_items_from_cmd(args.iocs, D_LIST, Item.Url))
 
     # IF input is not splitable, the entire line be added to the urls list.
     else:
-      result = validate_url(args.urls)
+      result = validate_url(args.iocs)
       if result != None:
         urls.append(result)
 
@@ -211,15 +212,15 @@ def ip_args(args):
   responses = []
 
   # Split all received ip addresses from the commandline into a list.
-  if args.ips != None:
-    chk = is_arg_list(args.ips)
+  if args.iocs != None:
+    chk = is_arg_list(args.iocs)
     
     if chk == True:
-      ips.extend(get_items_from_cmd(args.ips, D_LIST, Item.Ip))
+      ips.extend(get_items_from_cmd(args.iocs, D_LIST, Item.Ip))
 
     # Adds a single ip to a list if the array cant be split.
     else:
-      result = validate_ip(args.ips)
+      result = validate_ip(args.iocs)
       if result != None:
         ips.append(result)
   

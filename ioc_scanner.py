@@ -17,14 +17,14 @@ def main():
   ip_parser = subparsers.add_parser("ip")
   url_parser = subparsers.add_parser("url")
 
-  file_parser.add_argument("--hashes", action="store", help="Pass one or multiple hashes into the commandline. Eg: 1,2,3")
-  file_parser.add_argument("--file", action="store", help="Provide a file path to a list of hashes you want to scan.")
+  file_parser.add_argument("-i", "--iocs", action="store", help="Pass one or multiple hashes into the commandline. Eg: 1,2,3")
+  file_parser.add_argument("-f", "--file", action="store", help="Provide a file path to a list of hashes you want to scan.")
   
-  ip_parser.add_argument("--ips", action="store", help="Pass one or multiple IP addresses into the commandline. Eg: 1,2,3")
-  ip_parser.add_argument("--file", action="store", help="Provide a file path to a list of IP addresses you want to scan.")
+  ip_parser.add_argument("-i", "--iocs", action="store", help="Pass one or multiple IP addresses into the commandline. Eg: 1,2,3")
+  ip_parser.add_argument("-f", "--file", action="store", help="Provide a file path to a list of IP addresses you want to scan.")
 
-  url_parser.add_argument("--urls", action="store", help="Pass one or multiple URLs into the commandline. Eg: 1,2,3")
-  url_parser.add_argument("--file", action="store", help="Provide a file path to a list of URLs you want to scan.")
+  url_parser.add_argument("-i", "--iocs", action="store", help="Pass one or multiple URLs into the commandline. Eg: 1,2,3")
+  url_parser.add_argument("-f", "--file", action="store", help="Provide a file path to a list of URLs you want to scan.")
 
   args = parser.parse_args()
   if args.command == "hash":

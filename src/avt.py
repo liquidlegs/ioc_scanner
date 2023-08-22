@@ -106,7 +106,7 @@ class AlienVault:
     elif ind == Indicator.nids_list:
       base_url = base_url.replace("{section}", "nids_list")
 
-    print(f"url: {base_url}")
+    # print(f"url: {base_url}")
     req = requests.get(base_url, headers={
       self.JSON_HDR[0]: self.JSON_HDR[1],
       self.api_key[0]: self.api_key[1]
