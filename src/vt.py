@@ -1,9 +1,9 @@
 from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY
-from src.shared import Colour as C, Item
+from src.shared import Colour as C, Item, Dbg
 import requests
 import enum, json
 from prettytable.colortable import ColorTable
-import textwrap
+import time
 
 class VtApiErr(enum.Enum):
   Nan = 0
@@ -46,6 +46,11 @@ class VirusTotal:
     self.n_results = vt_objects
     self.raw_json = raw_json
     self.api_key = ["x-apikey", ""]
+
+
+  def dprint(self, text: str):
+    if self.debug == True:
+      Dbg._dprint(text)
 
 
   @classmethod
@@ -109,10 +114,15 @@ class VirusTotal:
   @classmethod
   def get_url_report(self, url_response: str) -> str:
     '''# Makes a GET request to a report for the corresponding url.'''
+    start = time.time()
+    
     response = requests.get(url_response, headers={
       self.JSON_HDR[0]: self.JSON_HDR[1],
       self.api_key[0]: self.api_key[1],
     })
+
+    end = time.time()
+    self.dprint(self, f"Took {end - start}s to send and receive url report/response")
 
     text = response.text
     return text
@@ -182,7 +192,11 @@ class VirusTotal:
     
     try:
       for url in urls:
+        start = time.time()
         resp = self.query_url_attributes(url)
+        end = time.time()
+
+        self.dprint(self, f"Took {end - start}s to submit and receive url report")
         err = self.handle_api_error(resp)
 
         # Responses that pass error checks will be parsed.

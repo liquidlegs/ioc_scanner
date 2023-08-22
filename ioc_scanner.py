@@ -8,6 +8,7 @@ def main():
   parser = argparse.ArgumentParser(description="none")
   parser.add_argument("-t", "--test", action="store_true", help="Test API keys are valid and that we can communicate with outside services")
   parser.add_argument("-o", "--otx-debug", action="store_true", help="Shows raw json response from AlienVault")
+  parser.add_argument("-d", "--debug", action="store_true", help="Enables debug messages to be globally displayed")
   subparsers = parser.add_subparsers(dest="command", help="query the VT api information about files, hashes, IPs and URLs", required=False)
 
   file_parser = subparsers.add_parser("hash")

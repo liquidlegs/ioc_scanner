@@ -268,3 +268,16 @@ class Colour:
 
   def bd_white(text: str) -> str:
     return f"{Back.WHITE}{Style.NORMAL}{text}{Back.RESET}{Style.NORMAL}"
+  
+
+class Dbg:
+
+  def __init__(self, debug=False):
+    self.debug = debug
+
+  def dprint(self, text: str):
+    if self.debug == True:
+      print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")
+        
+  def _dprint(text: str):
+    print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")

@@ -1,8 +1,8 @@
 from src.vt import VirusTotal, VtApiErr
 from src.avt import AlienVault, Ip, Indicator
-from src.shared import Colour as C, get_file_contents, get_items_from_list
+from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd
-import json
+import json, time
 
 
 def check_flags(args):
@@ -46,7 +46,8 @@ def test_connection(args):
 
 
 def hash_args(args):
-  print("file parser")
+  dbg = Dbg(args.debug)
+  dbg.dprint("Hash parsing")
 
   vt = VirusTotal(raw_json=args.raw_json)
   vt.init()
@@ -114,9 +115,10 @@ def hash_args(args):
 
 
 def url_args(args):
-  print("url parsing")
+  dbg = Dbg(args.debug)
+  dbg.dprint("Url parsing")
 
-  vt = VirusTotal(raw_json=args.raw_json)
+  vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
   vt.init()
 
   urls = []
@@ -199,7 +201,8 @@ def url_args(args):
 
 
 def ip_args(args):
-  print("ip parsing")
+  dbg = Dbg(args.debug)
+  dbg.dprint("IP parsing")
 
   vt = VirusTotal(raw_json=args.raw_json)
   vt.init()
