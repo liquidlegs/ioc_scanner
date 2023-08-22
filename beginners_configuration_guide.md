@@ -1,4 +1,4 @@
-# Basic Configuration
+# Beginners Configuration Guide
 The purpose of this document to demonstrate how to setup ioc_scanner to be used in a linux VM.
 
 This guide will assume that the reader has never cloned a github repository and little to no knowlege about using linux operating systems. This guide will however, assume that the user knows how to create the VM on their chosen cloud platform and can SSH into it.

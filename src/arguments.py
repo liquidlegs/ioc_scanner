@@ -2,7 +2,7 @@ from src.vt import VirusTotal, VtApiErr
 from src.avt import AlienVault, Ip, Indicator
 from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd
-import json, time
+import json
 
 
 def check_flags(args):
@@ -49,7 +49,7 @@ def hash_args(args):
   dbg = Dbg(args.debug)
   dbg.dprint("Hash parsing")
 
-  vt = VirusTotal(raw_json=args.raw_json)
+  vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
   vt.init()
 
   file_hashes = []
@@ -85,11 +85,11 @@ def hash_args(args):
       VirusTotal.file_get_quickscan(responses)
   ##########################################################
 
-  elif args.hash_file != None:
+  elif args.file != None:
     # Attempts to read the text file and split each line with CRLF or LF.
-    content = get_file_contents(args.hash_file, D_CRLF)
+    content = get_file_contents(args.file, D_CRLF)
     if len(content) < 2:
-      content = get_file_contents(args.hash_file, D_LF)
+      content = get_file_contents(args.file, D_LF)
     
     if len(content) < 2:
       print(f"{C.f_red('Error')}: unable to split each line by CRLF ('\r\n') or LF ('\n')")
@@ -162,11 +162,11 @@ def url_args(args):
       VirusTotal.url_get_quickscan(responses)
 
 
-  elif args.url_file != None:
+  elif args.file != None:
     # Input is read from a file and a list is returned containing each line.
-    content = get_file_contents(args.url_file, D_CRLF)
+    content = get_file_contents(args.file, D_CRLF)
     if len(content) < 2:
-      content = get_file_contents(args.url_file, D_LF)
+      content = get_file_contents(args.file, D_LF)
 
     if len(content) < 2:
       print(f"{C.f_red('Error')}: unable to split each line by CRLF ('\r\n') or LF ('\n')")
@@ -204,7 +204,7 @@ def ip_args(args):
   dbg = Dbg(args.debug)
   dbg.dprint("IP parsing")
 
-  vt = VirusTotal(raw_json=args.raw_json)
+  vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
   vt.init()
   
   ips = []
@@ -237,11 +237,11 @@ def ip_args(args):
       VirusTotal.ip_get_quickscan(responses)
 
   
-  elif args.ip_file != None:
+  elif args.file != None:
     # Attempts to read the text file and split each line with CRLF or LF.
-    content = get_file_contents(args.ip_file, D_CRLF)
+    content = get_file_contents(args.file, D_CRLF)
     if len(content) < 2:
-      content = get_file_contents(args.ip_file, D_LF)
+      content = get_file_contents(args.file, D_LF)
     
     if len(content) < 2:
       print(f"{C.f_red('Error')}: unable to split each line by CRLF ('\r\n') or LF ('\n')")

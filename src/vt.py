@@ -56,11 +56,16 @@ class VirusTotal:
   @classmethod
   def query_file_attributes(self, hash_id: str) -> str:
     '''Sends a GET request to the VT API about file attributes relating to a hash.'''
+    start = time.time()
+    
     url = f"{self.BASE_PTH_FILE_ATT}{hash_id}"
     response = requests.get(url, headers={
       self.JSON_HDR[0]: self.JSON_HDR[1],
       self.api_key[0]: self.api_key[1]
     })
+
+    end = time.time()
+    self.dprint(self, f"Took {end - start}s to query file attributes and receive a response")
 
     text = response.text
     return text
@@ -82,11 +87,16 @@ class VirusTotal:
   @classmethod
   def query_ip_attributes(self, ip: str) -> str:
     '''Sends a GET request to the VT API for information about an ip address.'''
+    start = time.time()
+    
     url = f"{self.BASE_PTH_IP_ATT}{ip}"
     response = requests.get(url, headers={
       self.JSON_HDR[0]: self.JSON_HDR[1],
       self.api_key[0]: self.api_key[1]
     })
+
+    end = time.time()
+    self.dprint(self, f"Took {end - start}s to query IP attributes and receive a response")
 
     text = response.text
     return text
@@ -95,6 +105,8 @@ class VirusTotal:
   @classmethod
   def query_url_attributes(self, url: str) -> str:    
     '''Sends a POST request to the VT API which scans the url and returns a link to the report.'''
+    start = time.time()
+
     # Prepares the api request to scan the url.
     base_url = self.BASE_PTH_URL_ATT
     payload = {"url": url}
@@ -106,6 +118,9 @@ class VirusTotal:
       self.FORM_HDR[0]: self.FORM_HDR[1]
     })
     
+    end = time.time()
+    self.dprint(self, f"Took {end - start}s to submit url and receive report link")
+
     # This response contains the json used to grab the report id for the scanned url.
     text = response.text
     return text
@@ -192,11 +207,7 @@ class VirusTotal:
     
     try:
       for url in urls:
-        start = time.time()
         resp = self.query_url_attributes(url)
-        end = time.time()
-
-        self.dprint(self, f"Took {end - start}s to submit and receive url report")
         err = self.handle_api_error(resp)
 
         # Responses that pass error checks will be parsed.
