@@ -1,4 +1,4 @@
-from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, re_contains
+from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY
 from src.shared import Colour as C, Item
 import requests
 import enum, json
