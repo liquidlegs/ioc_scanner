@@ -1,4 +1,4 @@
-from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY
+from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY, VIRUS_TOTAL_DISABLED
 from src.shared import Colour as C, Item, Dbg
 import requests
 import enum, json
@@ -27,9 +27,13 @@ class VirusTotal:
     '''Reads the config file and parses the json to retrieve the VT API key.'''
     data = load_config()
     key = parse_config_file(data[VIRUS_TOTAL_KEY])
+    disable_vt = parse_config_file(data[VIRUS_TOTAL_DISABLED])
 
     if key != None:
       self.api_key[1] = key
+
+    if disable_vt != None:
+      self.disabled = disable_vt
 
 
   @classmethod
@@ -42,10 +46,11 @@ class VirusTotal:
 
 
   @classmethod
-  def __init__(self, debug=False, vt_objects=10, raw_json=False):
+  def __init__(self, debug=False, vt_objects=10, raw_json=False, disabled=False):
     self.debug = debug
     self.n_results = vt_objects
     self.raw_json = raw_json
+    self.disabled = disabled
     self.api_key = ["x-apikey", ""]
 
 

@@ -1,11 +1,13 @@
-import os, json, re, enum, platform
+import os, json, re, enum, platform, sys
 from platform import system
 import colorama as cl
 from colorama import Fore, Back, Style
 cl.init(autoreset=True)
 
+CONFIG_ENV = "IOC_SCANNER_CONFIG"
 VIRUS_TOTAL_KEY = "vt_api_key"
 ALIEN_VAULT_KEY = "otx_api_key"
+VIRUS_TOTAL_DISABLED = "disable_vt"
 D_CRLF = "\r\n"
 D_LF = "\n"
 D_LIST = ","
@@ -15,6 +17,12 @@ class Item(enum.Enum):
   Ip = 0
   Hash = 1
   Url = 2
+
+
+class NameType(enum.Enum):
+  Nan = 0
+  Directory = 1
+  File = 2
 
 
 def validate_ip(ip: str) -> str:
@@ -44,14 +52,6 @@ def validate_domain(domain: str) -> str:
   '''# Function checks if the provided string is a valid domain.'''
   try:
     out = re.search(r"(\S+\.\S{2,})", domain).group(0)
-    return out
-  except AttributeError:
-    return None
-
-
-def re_contains(regex: str, text: str) -> str:
-  try:
-    out = re.search(regex, text).group(0)
     return out
   except AttributeError:
     return None
@@ -161,12 +161,99 @@ def load_config() -> str:
   if operating_sys == "Windows":
     delim = "\\"
 
-  filepath = f"{os.getcwd()}{delim}config.json"
-  with open(filepath, "r") as f:
-    buffer = f.read()
+  # Attempts to load the config file from an environment variable
+  filepath = os.environ.get(CONFIG_ENV)
+  if filepath != None:
+    try:
+      with open(filepath, "r") as f:
+        buffer = f.read()
+    except FileNotFoundError:
+      pass
 
-  data = json.loads(buffer)
+  if len(buffer) < 1:
+    pwd = os.getcwd()
+    script = sys.argv[0]
+    filename = get_script_name(pwd, script, delim)
+    filepath = f"{pwd}{delim}config.json"
+
+    # Loads the config file from the current directory.
+    try:
+      with open(filepath, "r") as f:
+        buffer = f.read()
+    except FileNotFoundError:
+      # print(f"File not found: {filepath}")
+      filepath = f"{pwd}{delim}{script}".replace(filename, "")
+
+    # Attempts to find the config file by combining the current directory with the first argument supplied to the command line.
+    try:
+      with open(filepath, "r") as f:
+        buffer = f.read()
+    except FileNotFoundError:
+      # print(f"File not found: {filepath}")
+      filepath = search_scanner_path(filename, filepath, delim) + "config.json"
+      
+    # Attempts to find the config file by working out how many directories the script needs to go back to get back to the root of the project.
+    try:
+      with open(filepath, "r") as f:
+        buffer = f.read()
+    except FileNotFoundError:
+      # print(f"File not found: {filepath}")
+      pass
+
+  data = None
+
+  try:
+    data = json.loads(buffer)
+  except json.decoder.JSONDecodeError:
+    print(f"{Colour.f_red('Error')} Unable to read config file.")
+  
   return data
+
+
+def get_script_name(pwd: str, arg: str, delim: str):
+  '''Gets the name of the python script supplied in the first argument.'''
+  path = f"{pwd}{delim}{arg}".split(delim)
+  dec = 1
+  
+  check_len = len(path)-dec
+
+  if check_len < 0:
+    return
+  
+  return path[len(path)-dec]
+
+
+def search_scanner_path(filename: str, filepath: str, delim: str):
+  ''''Function works out the name of the root of the project'''
+  file_name = ""
+  root = ""
+
+  # Gets the name of the current directory by taking the name of the script and removing the ext.
+  if len(filename) > 3:
+    file_name = filename[0:len(filename)-3] + delim
+  
+  regex = fr"({file_name}{delim}.+)"
+  
+  # Gets the root of the project and all sub directory names.
+  try:
+    out = re.search(regex, filepath).groups(0)
+    root = out[0]
+  except AttributeError:
+    pass
+  
+  # Counts how many subdirectories need to be removed.
+  split_root = root.split(delim)
+  if split_root[len(split_root)-1] == "":
+    split_root.pop()
+  
+  # Counts the chats to remove.
+  chars = 0
+  for i in range(len(split_root)):
+    if i > 0:
+      chars += len(split_root[i])+1
+
+  root = filepath[0:len(filepath)-chars]
+  return root
 
 
 def parse_config_file(data: str) -> str:
@@ -175,21 +262,26 @@ def parse_config_file(data: str) -> str:
   dt = data
   output = ""
 
-  if len(data) == 0:
-    return None
-
-  if dt[0] == '$':
-    env = dt[1:len(dt)]
-    expanded_env = os.environ.get(env)
-    
-    if expanded_env == None:
+  if type(data) == str:
+    if len(data) == 0:
       return None
 
-    if len(expanded_env) > 0:
-      output += expanded_env
+    if dt[0] == '$':
+      env = dt[1:len(dt)]
+      expanded_env = os.environ.get(env)
+      
+      if expanded_env == None:
+        return None
 
-  else:
-    output = dt
+      if len(expanded_env) > 0:
+        output += expanded_env
+
+    else:
+      output = dt
+
+  if type(data) == bool:
+    if bool(dt) == True:
+      output = dt
   
   return output
 
