@@ -11,6 +11,7 @@ class VtApiErr(enum.Enum):
   InvalidArgument = 2
   ResourceNotFound = 3
 
+
 class VirusTotal:
 
   BASE_PTH_FILE_ATT = "https://www.virustotal.com/api/v3/files/"

@@ -1,4 +1,4 @@
-from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY
+from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, re_contains
 from src.shared import Colour as C, Item
 import requests
 import enum, json
@@ -21,10 +21,11 @@ class Indicator(enum.Enum):
 
 
 class OtxApiErr(enum.Enum):
-  NotFound = 0
-  DataButEmpty = 1
-  Null = 2
-  SubRequired = 3
+  Nan = 0
+  NotFound = 1
+  DataButEmpty = 2
+  Null = 3
+  SubRequired = 4
 
 
 class Ip(enum.Enum):
@@ -77,7 +78,28 @@ class AlienVault:
     pass
 
 
-  def handle_otx_error():
+  def handle_otx_error(self, data: str, indicator: Indicator) -> OtxApiErr:
+    err = OtxApiErr.Nan
+    
+    if self.raw_json == True:
+      print(data)
+      exit(1)
+
+    try:
+      temp_err = OtxApiErr.Nan
+      dt = json.loads(data)
+
+      if indicator == Indicator.analysis:
+        msg = re_contains(r"(not\s+found|notfound)", dt["detail"])
+
+        if msg == "not found" or msg == "notfound":
+          err = OtxApiErr.NotFound
+          print(f"{C.f_red('Error')}: ({C.f_magenta('AlienVault')}) {C.fd_yellow(msg)}")
+
+      return err
+    except KeyError:
+      return err
+
     pass
 
 
@@ -114,6 +136,26 @@ class AlienVault:
 
     text = req.text
     return text
+
+
+  def collect_ip_responses(self, ips: list) -> list:
+    out = []
+
+    for address in ips:
+      pulses = self.get_ip_indicators(Ip.V4, address, Indicator.general)
+      http_scans = self.get_ip_indicators(Ip.V4, address, Indicator.http_scans)
+      passive_dns = self.get_ip_indicators(Ip.V4, address, Indicator.passive_dns)
+      malware_s = self.get_ip_indicators(Ip.V4, address, Indicator.malware)      
+
+      out.append([pulses, http_scans, passive_dns, malware_s])
+    
+    return out
+
+
+  def get_ip_quickscan(ips: list):    
+    
+    
+    pass
 
 
   def get_domain_indictors():

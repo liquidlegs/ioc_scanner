@@ -1,9 +1,8 @@
 from src.vt import VirusTotal, VtApiErr
 from src.avt import AlienVault, Ip, Indicator
-from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg
+from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg, ArgType
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd
 import json
-
 
 def check_flags(args):
   '''Function determines if global flags have been specified. If not, behaviour defaults to displaying the quickscan for the corresponding ioc'''
@@ -54,9 +53,7 @@ def hash_args(args):
   vt.init()
 
   file_hashes = []
-  responses = []
-
-  ##########################################################
+  
   # Code block handles file hashes entered in from the commandline.
   if args.iocs != None:
     # First few lines check if the hash(es) are splitable and adds them to the file_hashes list.
@@ -70,21 +67,7 @@ def hash_args(args):
       result = args.iocs
       if result != None:
         file_hashes.append(result)
-  
-  
-    if len(file_hashes) < 1:
-      print(f"{C.f_red('Error')}: No valid hashes to scan")
-      return
-    
-    # The VT API is called and the response is collected
-    responses.extend(vt.collect_file_responses(file_hashes))
 
-    if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Hash)
-
-    if check_flags(args) < 1:
-      VirusTotal.file_get_quickscan(responses)
-  ##########################################################
 
   elif args.file != None:
     # Attempts to read the text file and split each line with CRLF or LF.
@@ -99,20 +82,7 @@ def hash_args(args):
     # All hashes are added to the file_hashes list.
     file_hashes.extend(get_items_from_list(content, Item.Hash))
 
-
-    if len(file_hashes) < 1:
-      print(f"{C.f_red('Error')}: No valid hashes to scan")
-      return
-
-    # Hashes are sent to the Virus Total API and each response is stored in a list.
-    responses.extend(vt.collect_file_responses(file_hashes))
-
-    if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Hash)
-
-    # Displays basic threat score if user enabled quick_scan.
-    if check_flags(args) < 1:
-      VirusTotal.file_get_quickscan(responses)
+  vt_hash_args(args, file_hashes)
 
 
 def url_args(args):
@@ -123,8 +93,6 @@ def url_args(args):
   vt.init()
 
   urls = []
-  links = []
-  responses = []
 
   if args.iocs != None:
     # First few lines check if the url(s) are splitable and adds them to the urls list.
@@ -138,29 +106,6 @@ def url_args(args):
       result = validate_url(args.iocs)
       if result != None:
         urls.append(result)
-
-      if len(urls) < 1:
-        print(f"{C.f_red('Error')}: No valid urls to scan")
-        return
-
-    # POST requests are sent to the VT API backend and hyperlinks are collected that point to the corresponding url reports.
-    links.extend(vt.collect_url_reports(urls))
-
-    # GET requests are made to each link and the responses are collected and appended to the responses list.
-    for link in links:
-      resp = vt.get_url_report(link)
-      err = vt.handle_api_error(resp)
-
-      if err == VtApiErr.Nan:
-        data = json.loads(resp)
-        responses.append(data)
-
-
-    if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Url)
-
-    if check_flags(args) < 1:
-      VirusTotal.url_get_quickscan(responses)
 
 
   elif args.file != None:
@@ -176,41 +121,16 @@ def url_args(args):
     # The process here is the same as the comment above.
     # Only the method to get the data in script is different.
     urls.extend(get_items_from_list(content, Item.Url))
-
-    if len(urls) < 1:
-      print(f"{C.f_red('Error')}: No valid urls to scan")
-      return
-
-    # Ips are sent to the Virus Total API and each response is stored in a list.
-    links.extend(vt.collect_url_reports(urls))
-
-    for link in links:
-      resp = vt.get_url_report(link)
-      err = vt.handle_api_error(resp)
-
-      if err == VtApiErr.Nan:
-        data = json.loads(resp)
-        responses.append(data)
-
-
-    if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Url)
-
-    # Displays basic threat score if user enablled quick_scan.
-    if check_flags(args) < 1:
-      VirusTotal.url_get_quickscan(responses)
+  
+  vt_url_args(args, urls)
 
 
 def ip_args(args):
   dbg = Dbg(args.debug)
   dbg.dprint("IP parsing")
 
-  vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
-  vt.init()
-  
   ips = []
-  responses = []
-
+  
   # Split all received ip addresses from the commandline into a list.
   if args.iocs != None:
     chk = is_arg_list(args.iocs)
@@ -223,21 +143,7 @@ def ip_args(args):
       result = validate_ip(args.iocs)
       if result != None:
         ips.append(result)
-  
-  
-    if len(ips) < 1:
-      print(f"{C.f_red('Error')}: No valid ips to scan")
-      return
-    
-    responses.extend(vt.collect_ip_responses(ips))
 
-    if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Ip)
-
-    if check_flags(args) < 1:
-      VirusTotal.ip_get_quickscan(responses)
-
-  
   elif args.file != None:
     # Attempts to read the text file and split each line with CRLF or LF.
     content = get_file_contents(args.file, D_CRLF)
@@ -251,16 +157,91 @@ def ip_args(args):
     # All ips are added to the ip list.
     ips.extend(get_items_from_list(content, Item.Ip))
 
+  vt_ip_args(args, ips)
 
-    if len(ips) < 1:
-      print(f"{C.f_red('Error')}: No valid ips to scan")
+
+def vt_hash_args(args, file_hashes: list):
+  '''Function sends a list of provided hashes to the Virus Total API'''
+  vt = VirusTotal(debug=args.debug, raw_json=args.raw_json)
+  vt.init()
+
+  responses = []
+  
+  if len(file_hashes) < 1:
+      print(f"{C.f_red('Error')}: No valid hashes to scan")
       return
 
-    # Ips are sent to the Virus Total API and each response is stored in a list.
-    responses.extend(vt.collect_ip_responses(ips))
+  # Hashes are sent to the Virus Total API and each response is stored in a list.
+  responses.extend(vt.collect_file_responses(file_hashes))
 
-    if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Ip)
+  if args.av == True:
+    VirusTotal.get_av_detections(responses, Item.Hash)
 
-    if check_flags(args) < 1:
-      VirusTotal.ip_get_quickscan(responses)
+  # Displays basic threat score if user enabled quick_scan.
+  if check_flags(args) < 1:
+    VirusTotal.file_get_quickscan(responses)
+
+
+def vt_url_args(args, urls: list):
+  '''Function sends a list of provided urls/domains to the Virus Total API'''
+  vt = VirusTotal(debug=args.debug, raw_json=args.raw_json)
+  vt.init()
+
+  responses = []
+  links = []
+  
+  if len(urls) < 1:
+    print(f"{C.f_red('Error')}: No valid urls to scan")
+    return
+
+  # Ips are sent to the Virus Total API and each response is stored in a list.
+  links.extend(vt.collect_url_reports(urls))
+
+  for link in links:
+    resp = vt.get_url_report(link)
+    err = vt.handle_api_error(resp)
+
+    if err == VtApiErr.Nan:
+      data = json.loads(resp)
+      responses.append(data)
+
+
+  if args.av == True:
+    VirusTotal.get_av_detections(responses, Item.Url)
+
+  # Displays basic threat score if user enablled quick_scan.
+  if check_flags(args) < 1:
+    VirusTotal.url_get_quickscan(responses)
+
+
+def vt_ip_args(args, ips: list):
+  '''Function sends a list of provided IP addresses to the Virus Total API'''
+  vt = VirusTotal(debug=args.debug, raw_json=args.raw_json)
+  vt.init()
+
+  responses = []
+
+  if len(ips) < 1:
+    print(f"{C.f_red('Error')}: No valid ips to scan")
+    return
+
+  # Ips are sent to the Virus Total API and each response is stored in a list.
+  responses.extend(vt.collect_ip_responses(ips))
+  
+  if args.av == True:
+    VirusTotal.get_av_detections(responses, Item.Ip)
+
+  if check_flags(args) < 1:
+    VirusTotal.ip_get_quickscan(responses)
+
+
+def otx_url_args(args, urls: list):
+  pass
+
+
+def otx_hash_args(args, hashes: list):
+  pass
+
+
+def otx_ip_args(args, ips: list):
+  pass

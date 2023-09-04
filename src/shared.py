@@ -33,13 +33,25 @@ def validate_url(url: str) -> str:
     return out
   except AttributeError:
     domain = validate_domain(url)
-    return domain
+    
+    if domain != None:
+      return f"http://{domain}"
+    
+    return None
 
 
 def validate_domain(domain: str) -> str:
   '''# Function checks if the provided string is a valid domain.'''
   try:
-    out = re.search(r"(\S+\.\w{2,})", domain).group(0)
+    out = re.search(r"(\S+\.\S{2,})", domain).group(0)
+    return out
+  except AttributeError:
+    return None
+
+
+def re_contains(regex: str, text: str) -> str:
+  try:
+    out = re.search(regex, text).group(0)
     return out
   except AttributeError:
     return None
@@ -180,6 +192,12 @@ def parse_config_file(data: str) -> str:
     output = dt
   
   return output
+
+
+class ArgType(enum.Enum):
+  Nan = 0
+  File = 1
+  Cmd = 2
 
 
 class Colour:
