@@ -21,20 +21,19 @@ def test_connection(args):
   vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
   vt.init()
   if vt.is_apikey_loaded() == True:
-    print(f"{C.f_blue('Virus Total')} key {C.f_green('successfully')} loaded")
+    print(f"{C.f_green('[+]')} Successfully loaded config file")
 
   out = vt.query_ip_attributes("192.168.1.1")
   err = vt.handle_api_error(out)
 
   if err == VtApiErr.Nan:
-    print(C.f_green("Virus Total is correctly configured"))
+    print(f"{C.f_green('[+]')} Virus Total is correctly configured")
 
   otx = AlienVault()
   otx.init()
-  print(C.f_red("AlientVault is not yet implemented"))
+  print(f"{C.f_red('[-]')} AlientVault is not yet implemented")
   
   if otx.is_apikey_loaded() == True:
-    print(f"{C.f_blue('AlienVault')} key {C.f_green('successfully')} loaded")
     print(f"{C.f_yellow('Info')}: Alient API keys are only required viewing OTX premium content via the AlienVault Labs Threat Intelligence Subscription")
 
   otx_response = otx.get_ip_indicators(Ip.V4, "169.239.129.108", Indicator.general)

@@ -1,4 +1,4 @@
-from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY
+from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, ALIEN_VAULT_DISABLED
 from src.shared import Colour as C, Item
 import requests
 import enum, json
@@ -53,9 +53,13 @@ class AlienVault:
     '''Reads the config file and parses the json to retrieve the OTX API key.'''
     data = load_config()
     key = parse_config_file(data[ALIEN_VAULT_KEY])
-    
+    disable_otx = parse_config_file(data[ALIEN_VAULT_DISABLED])
+
     if key != None:
       self.api_key[1] = key
+
+    if disable_otx != None:
+      self.disabled = disable_otx
 
 
   @classmethod
@@ -68,9 +72,10 @@ class AlienVault:
 
 
   @classmethod
-  def __init__(self, debug=False, raw_json=False):
+  def __init__(self, debug=False, raw_json=False, disabled=False):
     self.debug = debug
     self.raw_json = raw_json
+    self.disabled = disabled
     self.api_key = ["X-OTX-API-KEY", ""]
 
 
@@ -85,20 +90,20 @@ class AlienVault:
       print(data)
       exit(1)
 
-    try:
-      temp_err = OtxApiErr.Nan
-      dt = json.loads(data)
+    # try:
+    #   temp_err = OtxApiErr.Nan
+    #   dt = json.loads(data)
 
-      if indicator == Indicator.analysis:
-        msg = re_contains(r"(not\s+found|notfound)", dt["detail"])
+    #   if indicator == Indicator.analysis:
+    #     msg = re_contains(r"(not\s+found|notfound)", dt["detail"])
 
-        if msg == "not found" or msg == "notfound":
-          err = OtxApiErr.NotFound
-          print(f"{C.f_red('Error')}: ({C.f_magenta('AlienVault')}) {C.fd_yellow(msg)}")
+    #     if msg == "not found" or msg == "notfound":
+    #       err = OtxApiErr.NotFound
+    #       print(f"{C.f_red('Error')}: ({C.f_magenta('AlienVault')}) {C.fd_yellow(msg)}")
 
-      return err
-    except KeyError:
-      return err
+    #   return err
+    # except KeyError:
+    #   return err
 
     pass
 

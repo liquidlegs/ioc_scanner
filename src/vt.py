@@ -10,6 +10,7 @@ class VtApiErr(enum.Enum):
   InvalidApiKey = 1
   InvalidArgument = 2
   ResourceNotFound = 3
+  AuthenticationRequired = 4
 
 
 class VirusTotal:
@@ -154,6 +155,8 @@ class VirusTotal:
     '''# Returns the corresponding VT API error via the response from VT'''
     if code.lower() == "wrongcredentialserror":
       return VtApiErr.InvalidApiKey
+    if code.lower() == "authenticationrequirederror":
+      return VtApiErr.AuthenticationRequired
     if code.lower() == "invalidargumenterror":
       return VtApiErr.InvalidArgument
     if code.lower() == "notfounderror":
@@ -166,6 +169,8 @@ class VirusTotal:
   def handle_execution_error(code: VtApiErr):
     '''# Kills the current process if the VT API key is invalid.'''
     if code == VtApiErr.InvalidApiKey:
+      exit(1)
+    if code == VtApiErr.AuthenticationRequired:
       exit(1)
 
 
@@ -280,34 +285,42 @@ class VirusTotal:
     if len(ips) < 1:
       return
 
+    rows = 0
     for resp in ips:
-      ip_addr = resp["data"]["id"]
-      att = resp["data"]["attributes"]
+      try:
+        ip_addr = resp["data"]["id"]
+        att = resp["data"]["attributes"]
 
-      analysis = att["last_analysis_stats"]
-      malicious = int(analysis["malicious"])
-      suspicious = int(analysis["suspicious"])
-      harmless = int(analysis["harmless"])
-      undetected = int(analysis["undetected"])
-      timeout = int(analysis["timeout"])
+        analysis = att["last_analysis_stats"]
+        malicious = int(analysis["malicious"])
+        suspicious = int(analysis["suspicious"])
+        harmless = int(analysis["harmless"])
+        undetected = int(analysis["undetected"])
+        timeout = int(analysis["timeout"])
 
-      o_mal = malicious
-      o_sus = suspicious
-      o_harm = harmless
-      o_tm = timeout
+        o_mal = malicious
+        o_sus = suspicious
+        o_harm = harmless
+        o_tm = timeout
 
-      if malicious > 0:
-        o_mal = C.b_red(C.f_white(malicious))
-      if suspicious > 0:
-        o_sus = C.fd_yellow(suspicious)
-      if harmless > 0:
-        o_harm = C.f_green(harmless)
-      if timeout > 0:
-        o_tm = C.f_blue(timeout)
+        if malicious > 0:
+          o_mal = C.b_red(C.f_white(malicious))
+        if suspicious > 0:
+          o_sus = C.fd_yellow(suspicious)
+        if harmless > 0:
+          o_harm = C.f_green(harmless)
+        if timeout > 0:
+          o_tm = C.f_blue(timeout)
 
-      table.add_row([C.f_green(ip_addr), o_mal, o_sus, o_harm, undetected, o_tm])
+        table.add_row([C.f_green(ip_addr), o_mal, o_sus, o_harm, undetected, o_tm])
+        rows += 1
+      except KeyError:
+        continue
 
-    print(table)
+    if rows > 0:
+      print(table)
+    else:
+      print("Nothing to display")
 
 
   @staticmethod
@@ -329,6 +342,7 @@ class VirusTotal:
     if len(urls) < 1:
       return
 
+    rows = 0
     for resp in urls:
       try:
         url_info = resp["meta"]["url_info"]["url"]
@@ -356,10 +370,14 @@ class VirusTotal:
           o_tm = C.f_blue(timeout)
 
         table.add_row([C.f_green(url_info), o_mal, o_sus, o_harm, undetected, o_tm])
+        rows += 1
       except KeyError:
-        pass
+        continue
 
-    print(table)
+    if rows > 0:
+      print(table)
+    else:
+      print("Nothing to display")
 
 
   @staticmethod
@@ -381,34 +399,42 @@ class VirusTotal:
     if len(hashes) < 1:
       return
 
+    rows = 0
     for resp in hashes:
-      hash = resp["data"]["id"]
-      att = resp["data"]["attributes"]
+      try:
+        hash = resp["data"]["id"]
+        att = resp["data"]["attributes"]
 
-      analysis = att["last_analysis_stats"]
-      malicious = int(analysis["malicious"])
-      suspicious = int(analysis["suspicious"])
-      harmless = int(analysis["harmless"])
-      undetected = int(analysis["undetected"])
-      timeout = int(analysis["timeout"])
+        analysis = att["last_analysis_stats"]
+        malicious = int(analysis["malicious"])
+        suspicious = int(analysis["suspicious"])
+        harmless = int(analysis["harmless"])
+        undetected = int(analysis["undetected"])
+        timeout = int(analysis["timeout"])
 
-      o_mal = malicious
-      o_sus = suspicious
-      o_harm = harmless
-      o_tm = timeout
+        o_mal = malicious
+        o_sus = suspicious
+        o_harm = harmless
+        o_tm = timeout
 
-      if malicious > 0:
-        o_mal = C.b_red(C.f_white(malicious))
-      if suspicious > 0:
-        o_sus = C.fd_yellow(suspicious)
-      if harmless > 0:
-        o_harm = C.f_green(harmless)
-      if timeout > 0:
-        o_tm = C.f_blue(timeout)
+        if malicious > 0:
+          o_mal = C.b_red(C.f_white(malicious))
+        if suspicious > 0:
+          o_sus = C.fd_yellow(suspicious)
+        if harmless > 0:
+          o_harm = C.f_green(harmless)
+        if timeout > 0:
+          o_tm = C.f_blue(timeout)
 
-      table.add_row([C.f_green(hash), o_mal, o_sus, o_harm, undetected, o_tm])
+        table.add_row([C.f_green(hash), o_mal, o_sus, o_harm, undetected, o_tm])
+        rows += 1
+      except KeyError:
+        continue
 
-    print(table)
+    if rows > 0:
+      print(table)
+    else:
+      print("Nothing to display")
 
   
   @staticmethod
