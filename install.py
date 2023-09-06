@@ -43,6 +43,7 @@ def linux_install(args):
       else:
         print(f"{C.f_red('[-]')} failed to configure Virus Total API key as no value was provided")
 
+      os.system(f". /home/{username}/.bashrc")
     else:
       print(f"{C.f_red('Error')}: .bashrc does not exist")
       print(f"{C.f_red('[-]')} installation failed")
