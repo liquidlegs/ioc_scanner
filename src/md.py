@@ -80,9 +80,8 @@ class MetaDenderCloud:
     end = time.time()
     self.dprint(f"Took {end - start}s to query file attributes and receive a response")
 
-    # text = resp.text
-    # return text
-    pass
+    text = resp.text
+    return text
 
 
   def get_hash_rep(self, hashes: list, nbr: NbrItems):
