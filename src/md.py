@@ -72,7 +72,7 @@ class MetaDenderCloud:
 
     if nbr == NbrItems.SINGLE:
       base = self.BASE_URL_PTH_SINGLE.replace("{ip}", ips[0])
-      resp = requests.post(base, headers=header, data={"address": ips})
+      resp = requests.request(method="POST", url=base, headers=header, data={"address": ips})
 
     else:
       base = self.BASE_IP_PTH_BULK

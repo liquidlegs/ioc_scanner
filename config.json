@@ -2,7 +2,7 @@
     "vt_api_key": "$VT_KEY",
     "otx_api_key": "$OTX_KEY",
     "md_api_key": "$METADF_KEY",
-    "disable_md": false,
-    "disable_vt": true,
+    "disable_md": true,
+    "disable_vt": false,
     "disable_otx": true
 }

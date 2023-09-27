@@ -158,7 +158,7 @@ def ip_args(args):
     ips.extend(get_items_from_list(content, Item.Ip))
 
   vt_ip_args(args, ips)
-  md_ip_args(args, ips)
+  # md_ip_args(args, ips)
 
 
 def md_ip_args(args, ips: list):
