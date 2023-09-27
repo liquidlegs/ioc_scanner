@@ -158,24 +158,19 @@ def ip_args(args):
     ips.extend(get_items_from_list(content, Item.Ip))
 
   vt_ip_args(args, ips)
-  md_ip_args(args, ips)
+  # md_ip_args(args, ips)
 
 
 def md_ip_args(args, ips: list):
   md = MetaDenderCloud(debug=args.debug, raw_json=args.raw_json)
   md.init()
 
-  # nbr_items = NbrItems.SINGLE
-  # if len(ips) > 1:
-  #   nbr_items = NbrItems.BULK
+  nbr_items = NbrItems.SINGLE
+  if len(ips) > 1:
+    nbr_items = NbrItems.BULK
 
-  responses = []
-
-  for i in ips:
-    responses.append(md.get_ip_rep(list(i), NbrItems.SINGLE))
-
-  for i in responses:
-    print(i)
+  resp = md.get_ip_rep(ips, nbr_items)
+  print(resp)
 
 
 def vt_hash_args(args, file_hashes: list):
