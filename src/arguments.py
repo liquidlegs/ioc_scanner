@@ -1,9 +1,12 @@
 from src.vt import VirusTotal, VtApiErr
 from src.avt import AlienVault, Ip, Indicator
-from src.md import MetaDenderCloud, NbrItems
+from src.md import MetaDefenderCloud, ItemType, MdfApiErr
 from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg, ArgType
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd
 import json
+
+metadef_disabled_w = f"{C.f_yellow('Warning')}: MetaDefenderCloud is disabled... Skipping"
+vt_disabled_w = f"{C.f_red('Error')}: Virus Total has been disabled... Skipping."
 
 def check_flags(args):
   '''Function determines if global flags have been specified. If not, behaviour defaults to displaying the quickscan for the corresponding ioc'''
@@ -22,8 +25,9 @@ def test_connection(args):
   vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
   vt.init()
   if vt.is_apikey_loaded() == True:
-    print(f"{C.f_green('[+]')} Successfully loaded config file")
+    print(f"{C.f_green('[+]')} Successfully found the Virus Total API key")
 
+  print(f"vt_disbaled {vt.disabled}")
   out = vt.query_ip_attributes("192.168.1.1")
   err = vt.handle_api_error(out)
 
@@ -43,6 +47,18 @@ def test_connection(args):
   
   if args.otx_debug == True:
     print(out)
+
+  md = MetaDefenderCloud()
+  md.init()
+  mapikey_info = ""
+  
+  if md.is_apikey_loaded() == True:
+    print(f"{C.f_green('[+]')} Successfully found the MetaDefenderCloud API key")
+
+    mapikey_info = md.get_apikey_info()
+    print(f"metadefender enabled: {md.disabled}")
+    MetaDefenderCloud.show_apikey_info(mapikey_info)
+
 
 
 def hash_args(args):
@@ -83,6 +99,7 @@ def hash_args(args):
     file_hashes.extend(get_items_from_list(content, Item.Hash))
 
   vt_hash_args(args, file_hashes)
+  md_hash_args(args, file_hashes)
 
 
 def url_args(args):
@@ -123,6 +140,7 @@ def url_args(args):
     urls.extend(get_items_from_list(content, Item.Url))
   
   vt_url_args(args, urls)
+  md_url_args(args, urls)
 
 
 def ip_args(args):
@@ -158,19 +176,63 @@ def ip_args(args):
     ips.extend(get_items_from_list(content, Item.Ip))
 
   vt_ip_args(args, ips)
-  # md_ip_args(args, ips)
+  md_ip_args(args, ips)
 
 
 def md_ip_args(args, ips: list):
-  md = MetaDenderCloud(debug=args.debug, raw_json=args.raw_json)
+  md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
   md.init()
 
-  nbr_items = NbrItems.SINGLE
-  if len(ips) > 1:
-    nbr_items = NbrItems.BULK
+  output = ""
 
-  resp = md.get_ip_rep(ips, nbr_items)
-  print(resp)
+  if md.disabled == False:
+    if len(ips) == 1:
+      output = md.get_ip_rep(ips[0])
+    elif len(ips) > 1:
+      output = md.get_ip_rep_bulk(ips)
+
+    if args.raw_json == True:
+      print(output[0])
+
+    err = md.handle_api_error(output[0])
+    if err == MdfApiErr.Nan:
+      MetaDefenderCloud.get_quickscan_ip(output[0], output[1])
+  else:
+    print(metadef_disabled_w)
+
+
+def md_hash_args(args, hashes: list):
+  md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
+  md.init()
+
+  output = ""
+
+  if md.disabled == False:
+    if len(hashes) == 1:
+      output = md.get_hash_rep(hashes[0])
+    elif len(hashes) > 1:
+      output = md.get_hash_rep_bulk(hashes)
+
+    MetaDefenderCloud.get_quickscan_hash(output[0], output[1])
+  else:
+    print(metadef_disabled_w)
+
+
+def md_url_args(args, urls: list):
+  md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
+  md.init()
+
+  output = ""
+
+  if md.disabled == False:
+    if len(urls) == 1:
+      output = md.get_url_rep(urls[0], ItemType.URL)
+    elif len(urls) > 1:
+      output = md.get_url_rep_bulk(urls, ItemType.URL)
+
+    print(output[0])
+  else:
+    print(metadef_disabled_w)
 
 
 def vt_hash_args(args, file_hashes: list):
@@ -195,7 +257,7 @@ def vt_hash_args(args, file_hashes: list):
     if check_flags(args) < 1:
       VirusTotal.file_get_quickscan(responses)
   else:
-    print(f"{C.f_red('Error')}: Virus Total has been disabled... Skipping.")
+    print(vt_disabled_w)
 
 
 def vt_url_args(args, urls: list):
@@ -230,7 +292,7 @@ def vt_url_args(args, urls: list):
     if check_flags(args) < 1:
       VirusTotal.url_get_quickscan(responses)
   else:
-    print(f"{C.f_red('Error')}: Virus Total has been disabled... Skipping.")
+    print(vt_disabled_w)
 
 
 def vt_ip_args(args, ips: list):
@@ -254,7 +316,7 @@ def vt_ip_args(args, ips: list):
     if check_flags(args) < 1:
       VirusTotal.ip_get_quickscan(responses)
   else:
-    print(f"{C.f_red('Error')}: Virus Total has been disabled... Skipping.")
+    print(vt_disabled_w)
 
 
 def otx_url_args(args, urls: list):

@@ -34,7 +34,7 @@ class VirusTotal:
       self.api_key[1] = key
 
     if disable_vt != None:
-      self.disabled = disable_vt
+      self.disabled = bool(disable_vt)
 
 
   @classmethod
