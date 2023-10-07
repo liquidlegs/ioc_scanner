@@ -1,9 +1,8 @@
-from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY, VIRUS_TOTAL_DISABLED
+from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY, VIRUS_TOTAL_DISABLED, SUPRESS_WARNINGS
 from src.shared import Colour as C, Item, Dbg
-import requests
-import enum, json
+import requests, enum, json, time
 from prettytable.colortable import ColorTable
-import time
+from datetime import datetime
 
 class VtApiErr(enum.Enum):
   Nan = 0
@@ -19,9 +18,11 @@ class VirusTotal:
   BASE_PTH_FILE_BEH = "https://www.virustotal.com/api/v3/files/"
   BASE_PTH_IP_ATT = "https://www.virustotal.com/api/v3/ip_addresses/"
   BASE_PTH_URL_ATT = "https://www.virustotal.com/api/v3/urls"
+  BASE_PTH_SCH = "https://www.virustotal.com/api/v3/search?query={ioc}"
 
   JSON_HDR = ("accept", "application/json")
   FORM_HDR = ("content-type", "application/x-www-form-urlencoded")
+  CNT_LEN_HDR = "content-length"
 
   @classmethod
   def init(self):
@@ -29,12 +30,16 @@ class VirusTotal:
     data = load_config()
     key = parse_config_file(data[VIRUS_TOTAL_KEY])
     disable_vt = parse_config_file(data[VIRUS_TOTAL_DISABLED])
+    warnings = parse_config_file(data[SUPRESS_WARNINGS])
 
     if key != None:
       self.api_key[1] = key
 
     if disable_vt != None:
       self.disabled = bool(disable_vt)
+
+    if warnings != None:
+      self.supress_warnings = bool(warnings)
 
 
   @classmethod
@@ -52,6 +57,7 @@ class VirusTotal:
     self.n_results = vt_objects
     self.raw_json = raw_json
     self.disabled = disabled
+    self.supress_warnings = False
     self.api_key = ["x-apikey", ""]
 
 
@@ -122,6 +128,7 @@ class VirusTotal:
     response = requests.post(base_url, data=payload, headers={
       self.JSON_HDR[0]: self.JSON_HDR[1],
       self.api_key[0]: self.api_key[1],
+      self.CNT_LEN_HDR: str(len(url)),
       self.FORM_HDR[0]: self.FORM_HDR[1]
     })
     
@@ -212,7 +219,7 @@ class VirusTotal:
   
 
   @classmethod
-  def collect_url_reports(self, urls: list):
+  def collect_url_report_links(self, urls: list):
     '''Sends each specified url to the VT API backend and retrieves the link to the url report.'''
     links = []
     
@@ -230,6 +237,36 @@ class VirusTotal:
       pass
 
     return links
+
+
+  def get_url_reputation(self, url: str) -> str:
+    start = time.time()
+    base_url = self.BASE_PTH_SCH.replace("{ioc}", url)
+    
+    response = requests.get(base_url, headers={
+      self.JSON_HDR[0]: self.JSON_HDR[1],
+      self.api_key[0]: self.api_key[1],
+    })
+
+    end = time.time()
+    self.dprint(f"Took {end - start}s to send request and receive url json response")
+
+    text = response.text
+    return text
+
+
+  def collect_url_responses(self, urls: list) -> list:
+    responses = []
+
+    for url in urls:
+      resp = self.get_url_reputation(url)
+      err = self.handle_api_error(resp)
+
+      if err == VtApiErr.Nan:
+        data = json.loads(resp)
+        responses.append(data)
+    
+    return responses
 
 
   @classmethod
@@ -275,11 +312,14 @@ class VirusTotal:
     table.align = "l"
     table.field_names = [
       C.f_yellow("IP Address"), 
-      C.f_yellow("Malicious"), 
-      C.f_yellow("Suspcious"), 
-      C.f_yellow("Harmless"), 
-      C.f_yellow("Undetected"), 
-      C.f_yellow("Timeout")
+      C.f_yellow("M"), 
+      C.f_yellow("S"), 
+      C.f_yellow("H"),
+      C.f_yellow("Country"),
+      C.f_yellow("Continent"),
+      C.f_yellow("Repuation"),
+      C.f_yellow("Owner"),
+      C.f_yellow("Network")
     ]
 
     if len(ips) < 1:
@@ -290,18 +330,21 @@ class VirusTotal:
       try:
         ip_addr = resp["data"]["id"]
         att = resp["data"]["attributes"]
+        
+        country = att["country"]
+        cont = att["continent"]
+        rep = int(att["reputation"])
+        owner = att["as_owner"]
+        network = C.f_green(att["network"])
 
         analysis = att["last_analysis_stats"]
         malicious = int(analysis["malicious"])
         suspicious = int(analysis["suspicious"])
         harmless = int(analysis["harmless"])
-        undetected = int(analysis["undetected"])
-        timeout = int(analysis["timeout"])
 
         o_mal = malicious
         o_sus = suspicious
         o_harm = harmless
-        o_tm = timeout
 
         if malicious > 0:
           o_mal = C.b_red(C.f_white(malicious))
@@ -309,11 +352,260 @@ class VirusTotal:
           o_sus = C.fd_yellow(suspicious)
         if harmless > 0:
           o_harm = C.f_green(harmless)
-        if timeout > 0:
-          o_tm = C.f_blue(timeout)
+        if rep < 0:
+          rep = C.b_red(C.f_white(rep))
 
-        table.add_row([C.f_green(ip_addr), o_mal, o_sus, o_harm, undetected, o_tm])
+        table.add_row([C.f_green(ip_addr), o_mal, o_sus, o_harm, country, cont, rep, owner, network])
         rows += 1
+      except KeyError:
+        continue
+
+    if rows > 0:
+      print(table)
+    else:
+      print("Nothing to display")
+
+
+  def check_json_error(data: str, key: str) -> str:
+    try:
+      out = data[key]
+      return out
+    except KeyError:
+      return ""
+
+
+  def separate_string(input: str) -> str:
+    out = ""
+    
+    if len(input) > 0:
+      if input[len(input)-1] != ",":
+        out += input + ","
+    
+    return out
+
+
+  def url_get_vtintel_quickscan(urls: list):
+    '''Displays basic information and threat scores of each specified URL to the screen.'''
+    print(f"Starting quickscan with {len(urls)} valid urls")
+
+    table = ColorTable()
+    table.align = "l"
+    table.max_width = 120
+    table._max_width = {
+      C.f_yellow("URL"): 100,
+      C.f_yellow("M"): 3,
+      C.f_yellow("S"): 3,
+      C.f_yellow("H"): 3,
+      C.f_yellow("ThreatNames"): 30,
+      C.f_yellow("Categories"): 30,
+      C.f_yellow("Rep"): 8,
+      C.f_yellow("Code"): 6,
+    }
+
+    table.field_names = [
+      C.f_yellow("URL"),
+      C.f_yellow("M"),
+      C.f_yellow("S"),
+      C.f_yellow("H"),
+      C.f_yellow("ThreatNames"),
+      C.f_yellow("Categories"),
+      C.f_yellow("Rep"),
+      C.f_yellow("Code"),
+    ]
+
+    if len(urls) < 1:
+      return
+
+    rows = 0
+    for resp in urls:
+      try:
+        data = resp["data"]
+
+        for idx in data:
+          att = idx["attributes"]
+          stats = att["last_analysis_stats"]
+          url = C.f_green(att["url"])
+          cat = ""
+          
+          malicious = VirusTotal.check_json_error(stats, "malicious")
+          sus = VirusTotal.check_json_error(stats, "suspicious")
+          harm = VirusTotal.check_json_error(stats, "harmless")
+
+          code = VirusTotal.check_json_error(att, "last_http_response_code")
+          rep = VirusTotal.check_json_error(att, "reputation")
+
+          categories = VirusTotal.check_json_error(att, "categories")
+          force_point = VirusTotal.check_json_error(categories, "Forcepoint ThreatSeeker")
+          sophos = VirusTotal.check_json_error(categories, "sophos")
+          verdict_c = VirusTotal.check_json_error(categories, "Xcitium Verdict Cloud")
+          root = VirusTotal.check_json_error(categories, "Webroot")
+
+          if force_point != None:
+            cat += force_point
+          
+          if sophos != None:
+            cat = VirusTotal.separate_string(cat)
+            cat += sophos
+          
+          if verdict_c != None:
+            cat = VirusTotal.separate_string(cat)
+            cat += verdict_c
+          
+          if root != None:
+            cat = VirusTotal.separate_string(cat)
+            cat += root
+
+          if len(cat) > 0 and cat[len(cat)-1] == ",":
+            cat = cat[0:len(cat)-2]
+
+          t_names = ""
+          threat_names = VirusTotal.check_json_error(att, "threat_names")
+
+          for i in threat_names:
+            t_names += i + ","
+
+          if malicious > 0:
+            malicious = C.b_red(C.f_white(malicious))
+          
+          if rep < 0:
+            rep = C.b_red(C.f_white(rep))
+          elif rep > 0:
+            rep = C.f_green(rep)
+
+          if sus > 0:
+            sus = C.fd_yellow(sus)
+
+          if harm > 0:
+            harm = C.f_green(harm)
+
+          table.add_row([url, malicious, sus, harm, t_names, cat, rep, code])
+          rows += 1
+        
+      except KeyError:
+        continue
+
+    if rows > 0:
+      print(table)
+    else:
+      print("Nothing to display")
+
+
+  def unload_dns_records(records: str) -> str:
+    out = ""
+
+    for i in records:
+      key_type = VirusTotal.check_json_error(i, "type")
+      value = VirusTotal.check_json_error(i, "value")
+      
+      out += f"{key_type}:{value}, "
+
+    if len(out) > 0 and out[len(out)-2] == ",":
+      out = out[0:len(out)-3]
+    
+    return out
+
+
+  def domain_get_vtintel_quickscan(domains: list):
+    '''Displays basic information and threat scores of each specified Domain to the screen.'''
+    print(f"Starting quickscan with {len(domains)} valid urls")
+
+    table = ColorTable()
+    table.align = "l"
+    table.field_names = [
+      C.f_yellow("Domain"),
+      C.f_yellow("M"),
+      C.f_yellow("S"),
+      C.f_yellow("H"),
+      C.f_yellow("Category"),
+      C.f_yellow("HTTPS_cert_date"),
+      C.f_yellow("Created"),
+      C.f_yellow("Rep"),
+      C.f_yellow("DNS Records"),
+      C.f_yellow("Tags")
+    ]
+
+    table._max_width = {
+      C.f_yellow("Domain"): 50,
+      C.f_yellow("M"): 8,
+      C.f_yellow("S"): 8,
+      C.f_yellow("H"): 8,
+      C.f_yellow("Category"): 30,
+      C.f_yellow("HTTPS_cert_date"): 10,
+      C.f_yellow("Created"): 10,
+      C.f_yellow("Rep"): 8,
+      C.f_yellow("DNS Records"): 60,
+      C.f_yellow("Tags"): 20
+    }
+
+    rows = 0
+    for resp in domains:
+      try:
+
+        data = resp["data"]
+        for idx in data:
+          att = idx["attributes"]
+          stats = VirusTotal.check_json_error(att, "last_analysis_stats")
+          cat = ""
+          tags = ""
+
+          domain = VirusTotal.check_json_error(idx, "id")
+          domain = C.f_green(domain)
+
+          last_cert = VirusTotal.check_json_error(att, "last_https_certificate_date")
+          create_date = VirusTotal.check_json_error(att, "creation_date")
+          rep = int(VirusTotal.check_json_error(att, "reputation"))
+          malicious = int(VirusTotal.check_json_error(stats, "malicious"))
+          sus = int(VirusTotal.check_json_error(stats, "suspicious"))
+          harm = int(VirusTotal.check_json_error(stats, "harmless"))
+
+          categories = VirusTotal.check_json_error(att, "categories")
+          force_point = VirusTotal.check_json_error(categories, "Forcepoint ThreatSeeker")
+          sophos = VirusTotal.check_json_error(categories, "sophos")
+          verdict_c = VirusTotal.check_json_error(categories, "Xcitium Verdict Cloud")
+          root = VirusTotal.check_json_error(categories, "Webroot")
+          alpha = VirusTotal.check_json_error(categories, "alphaMountain.ai")
+
+          tag = VirusTotal.check_json_error(att, "tags")
+          for i in tag:
+            tags += i + " "
+
+          if force_point != None:
+            cat += force_point
+          
+          if sophos != None:
+            cat = VirusTotal.separate_string(cat)
+            cat += sophos
+          
+          if verdict_c != None:
+            cat = VirusTotal.separate_string(cat)
+            cat += verdict_c
+          
+          if root != None:
+            cat = VirusTotal.separate_string(cat)
+            cat += root
+          
+          if alpha != None:
+            cat = VirusTotal.separate_string(cat)
+            cat += alpha
+
+          records = VirusTotal.check_json_error(att, "last_dns_records")
+          dns_records = VirusTotal.unload_dns_records(records)
+
+          if malicious > 0:
+            malicious = C.b_red(C.f_white(malicious))
+          if sus > 0:
+            sus = C.fd_yellow(sus)
+          if harm > 0:
+            harm = C.f_green(harm)
+          if rep < 0:
+            rep = C.b_red(C.f_white(rep))
+
+          l_cert = datetime.fromtimestamp(last_cert).strftime("%Y-%m-%d")
+          c_date = datetime.fromtimestamp(create_date).strftime("%Y-%m-%d")
+          
+          table.add_row([domain, malicious, sus, harm, cat, l_cert, c_date, rep, dns_records, tags])
+          rows += 1
+
       except KeyError:
         continue
 
@@ -380,6 +672,15 @@ class VirusTotal:
       print("Nothing to display")
 
 
+  def pop_string(string: str) -> str:
+    out = string
+
+    if len(string) > 0:
+      out = string[0:len(string)-1]
+    
+    return out    
+
+
   @staticmethod
   def file_get_quickscan(hashes: str) -> str:
     '''Displays basic information and threat scores of each specified file hash to the screen.'''
@@ -388,13 +689,34 @@ class VirusTotal:
     table = ColorTable()
     table.align = "l"
     table.field_names = [
-      C.f_yellow("File Hash"), 
-      C.f_yellow("Malicious"), 
-      C.f_yellow("Suspcious"), 
-      C.f_yellow("Harmless"), 
-      C.f_yellow("Undetected"), 
-      C.f_yellow("Timeout")
+      C.f_yellow("Sha256"), 
+      C.f_yellow("M"), 
+      C.f_yellow("S"), 
+      C.f_yellow("H"), 
+      C.f_yellow("Name(s)"),
+      C.f_yellow("Type"),
+      C.f_yellow("Threat Label"),
+      C.f_yellow("Sections"),
+      C.f_yellow("Imports"),
+      C.f_yellow("Exports"),
+      C.f_yellow("EntryPoint"),
+      C.f_yellow("Rep")
     ]
+
+    table._max_width = {
+      C.f_yellow("Sha256"): 64, 
+      C.f_yellow("M"): 8, 
+      C.f_yellow("S"): 8, 
+      C.f_yellow("H"): 8, 
+      C.f_yellow("Name(s)"): 20,
+      C.f_yellow("Type"): 15,
+      C.f_yellow("Threat Label"): 20,
+      C.f_yellow("Sections"): 8,
+      C.f_yellow("Imports"): 8,
+      C.f_yellow("Exports"): 8,
+      C.f_yellow("EntryPoint"): 8,
+      C.f_yellow("Rep"): 8
+    }
 
     if len(hashes) < 1:
       return
@@ -404,18 +726,42 @@ class VirusTotal:
       try:
         hash = resp["data"]["id"]
         att = resp["data"]["attributes"]
+        
+        popular_threat = VirusTotal.check_json_error(att, "popular_threat_classification")
+        threat_label = VirusTotal.check_json_error(popular_threat, "suggested_threat_label")
+        type_d = VirusTotal.check_json_error(att, "type_description")
+        tag = VirusTotal.check_json_error(att, "tags")
+        rep = int(VirusTotal.check_json_error(att, "reputation"))
+
+        pe_info = VirusTotal.check_json_error(att, "pe_info")
+        section = VirusTotal.check_json_error(pe_info, "sections")
+        import_list = VirusTotal.check_json_error(pe_info, "import_list")
+        export_list = VirusTotal.check_json_error(pe_info, "exports")
+        entry = f"0x{VirusTotal.check_json_error(pe_info, 'entry_point')}"
+
+        names = ""
+        imports = 0
+        exports = len(export_list)
+        sections = len(section)
 
         analysis = att["last_analysis_stats"]
         malicious = int(analysis["malicious"])
         suspicious = int(analysis["suspicious"])
         harmless = int(analysis["harmless"])
-        undetected = int(analysis["undetected"])
-        timeout = int(analysis["timeout"])
+        exe_names = VirusTotal.check_json_error(att, "names")
+
+        for i in exe_names:
+          names += i + ","
+
+        names = VirusTotal.pop_string(names)
+
+        for i in import_list:
+          functions = VirusTotal.check_json_error(i, "imported_functions")
+          imports += len(functions)
 
         o_mal = malicious
         o_sus = suspicious
         o_harm = harmless
-        o_tm = timeout
 
         if malicious > 0:
           o_mal = C.b_red(C.f_white(malicious))
@@ -423,10 +769,17 @@ class VirusTotal:
           o_sus = C.fd_yellow(suspicious)
         if harmless > 0:
           o_harm = C.f_green(harmless)
-        if timeout > 0:
-          o_tm = C.f_blue(timeout)
 
-        table.add_row([C.f_green(hash), o_mal, o_sus, o_harm, undetected, o_tm])
+        if rep > 0:
+          rep = C.f_green(rep)
+        elif rep < 0:
+          rep = C.b_red(C.f_white(rep))
+
+        hash = C.f_green(hash)
+        entry = C.fd_yellow(entry)
+
+
+        table.add_row([hash, o_mal, o_sus, o_harm, names, type_d, threat_label, sections, imports, exports, entry, rep])
         rows += 1
       except KeyError:
         continue

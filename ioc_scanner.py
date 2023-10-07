@@ -2,7 +2,7 @@
 
 import argparse
 from src.shared import Colour as C
-from src.arguments import hash_args, url_args, ip_args, test_connection
+from src.arguments import ioc_args, test_connection, ItemType
 
 def main():
   parser = argparse.ArgumentParser(description="none")
@@ -25,14 +25,15 @@ def main():
 
   url_parser.add_argument("-i", "--iocs", action="store", help="Pass one or multiple URLs into the commandline. Eg: 1,2,3")
   url_parser.add_argument("-f", "--file", action="store", help="Provide a file path to a list of URLs you want to scan.")
+  url_parser.add_argument("-s", "--scan", action="store_true", help="Send urls/domains to be scanned and analyzed by Virus Total")
 
   args = parser.parse_args()
   if args.command == "hash":
-    hash_args(args)
+    ioc_args(ItemType.HASH, args)
   elif args.command == "url":
-    url_args(args)
+    ioc_args(ItemType.URL, args)
   elif args.command == "ip":
-    ip_args(args)
+    ioc_args(ItemType.IP, args)
   elif args.test == True:
     test_connection(args)
 

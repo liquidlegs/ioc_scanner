@@ -11,6 +11,7 @@ VIRUS_TOTAL_DISABLED = "disable_vt"
 ALIEN_VAULT_DISABLED = "disable_otx"
 METADF_KEY = "md_api_key"
 METADF_DISABLED = "disable_md"
+SUPRESS_WARNINGS = "supress_warnings"
 D_CRLF = "\r\n"
 D_LF = "\n"
 D_LIST = ","
@@ -20,6 +21,7 @@ class Item(enum.Enum):
   Ip = 0
   Hash = 1
   Url = 2
+  Domain = 3
 
 
 class NameType(enum.Enum):
@@ -28,8 +30,17 @@ class NameType(enum.Enum):
   File = 2
 
 
+def validate_hash(hash: str) -> str:
+  '''Function checks that the provided string is an MD5, SHA1, or SHA256 hash.'''
+  try:
+    out = re.search(r"(^[a-fA-f0-9]{64}$|^[a-fA-f0-9]{40}$|^[a-fA-f0-9]{32}$)", hash).group(0)
+    return out
+  except AttributeError:
+    return None
+
+
 def validate_ip(ip: str) -> str:
-  '''# Function checks that the provided string is a IPv4 address.'''
+  '''Function checks that the provided string is a IPv4 address.'''
   try:
     out = re.search(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})", ip).group(0)
     return out
@@ -38,23 +49,22 @@ def validate_ip(ip: str) -> str:
 
 
 def validate_url(url: str) -> str:
-  '''# Function checks if the provided string is a valid url.'''
+  '''Function checks if the provided string is a valid url.'''
   try:
-    out = re.search(r"(\w+://\S+\.\w+\S+)", url).group(0)
+    out = re.search(r"(\w+://\S+\.\w+\S+|.+/\S+)", url).group(0)
+    
+    if out.startswith("http") == False:
+      out = f"https://{out}"
+
     return out
   except AttributeError:
-    domain = validate_domain(url)
-    
-    if domain != None:
-      return f"http://{domain}"
-    
     return None
 
 
 def validate_domain(domain: str) -> str:
-  '''# Function checks if the provided string is a valid domain.'''
+  '''Function checks if the provided string is a valid domain.'''
   try:
-    out = re.search(r"(\S+\.\S{2,})", domain).group(0)
+    out = re.search(r"(^\w+[a-zA-Z0-9.]+\.\w+$)", domain).group(0)
     return out
   except AttributeError:
     return None
@@ -68,7 +78,9 @@ def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
   if cmd_item == Item.Ip:
     for ip in temp_items:
       result = validate_ip(ip)
-      out.append(result)
+      
+      if result != None:
+        out.append(result)
 
   
   elif cmd_item == Item.Hash:
@@ -78,7 +90,18 @@ def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
   elif cmd_item == Item.Url:
     for url in temp_items:
       result = validate_url(url)
-      out.append(result)
+      
+      if result != None:
+        out.append(result)
+
+
+  elif cmd_item == Item.Domain:
+    for domain in temp_items:
+      result = validate_domain(domain)
+      
+      if result != None:
+        out.append(result)
+
 
   return out
 
@@ -90,13 +113,25 @@ def get_items_from_list(content: list[str], file_item: Item) -> list[str]:
   if file_item == Item.Ip:
     for line in content:
       ip = validate_ip(line)
-      out.append(ip)
+      
+      if ip != None:
+        out.append(ip)
 
 
   elif file_item == Item.Url:
     for line in content:
       url = validate_url(line)
-      out.append(url)
+
+      if url != None:
+        out.append(url)
+
+
+  elif file_item == Item.Domain:
+    for line in content:
+      domain = validate_domain(line)
+      
+      if domain != None:
+        out.append(domain)
 
 
   elif file_item == Item.Hash:

@@ -1,0 +1,4 @@
+login.secureway.fun
+api.safeit.com/install/log?error=
+http://216.128.145.196/wellseconds/?p=7982
+http://47.99.160.202:50002/match

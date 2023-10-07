@@ -1,4 +1,4 @@
-from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, ALIEN_VAULT_DISABLED
+from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, ALIEN_VAULT_DISABLED, SUPRESS_WARNINGS
 from src.shared import Colour as C, Item
 import requests
 import enum, json
@@ -54,12 +54,16 @@ class AlienVault:
     data = load_config()
     key = parse_config_file(data[ALIEN_VAULT_KEY])
     disable_otx = parse_config_file(data[ALIEN_VAULT_DISABLED])
+    warnings = parse_config_file(data[SUPRESS_WARNINGS])
 
     if key != None:
       self.api_key[1] = key
 
     if disable_otx != None:
       self.disabled = disable_otx
+
+    if warnings != None:
+      self.supress_warnings = warnings
 
 
   @classmethod
@@ -76,6 +80,7 @@ class AlienVault:
     self.debug = debug
     self.raw_json = raw_json
     self.disabled = disabled
+    self.supress_warnings = False
     self.api_key = ["X-OTX-API-KEY", ""]
 
 
@@ -157,9 +162,7 @@ class AlienVault:
     return out
 
 
-  def get_ip_quickscan(ips: list):    
-    
-    
+  def get_ip_quickscan(ips: list):
     pass
 
 

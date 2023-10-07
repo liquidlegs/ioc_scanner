@@ -4,5 +4,6 @@
     "md_api_key": "$METADF_KEY",
     "disable_md": true,
     "disable_vt": false,
-    "disable_otx": true
+    "disable_otx": true,
+    "supress_warnings": true
 }

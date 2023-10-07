@@ -1,0 +1,529 @@
+{
+    "data": [
+        {
+            "address": "169.239.129.108",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:08:19.229Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.297Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.237Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.272Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.272Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.272Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.272Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.272Z",
+                        "status": 5
+                    }
+                ]
+            },
+            "geo_info": {
+                "country": {
+                    "name": "South Africa"
+                },
+                "city": {
+                    "name": "Johannesburg"
+                },
+                "location": {
+                    "latitude": -26.19917,
+                    "longitude": 28.05639
+                },
+                "subdivisions": [
+                    {
+                        "name": "Gauteng"
+                    }
+                ]
+            }
+        },
+        {
+            "address": "20.99.184.37",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:08:19.614Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.672Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.621Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.652Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.652Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.652Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.652Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.652Z",
+                        "status": 5
+                    }
+                ]
+            },
+            "geo_info": {
+                "country": {
+                    "name": "United States"
+                },
+                "city": {
+                    "name": "Quincy"
+                },
+                "location": {
+                    "latitude": 47.20603,
+                    "longitude": -119.79934
+                },
+                "subdivisions": [
+                    {
+                        "name": "Washington"
+                    }
+                ]
+            }
+        },
+        {
+            "address": "23.216.147.64",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:08:19.971Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.037Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:19.981Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.006Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.006Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.006Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.006Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.006Z",
+                        "status": 5
+                    }
+                ]
+            },
+            "geo_info": {
+                "country": {
+                    "name": "United States"
+                },
+                "city": {
+                    "name": "Seattle"
+                },
+                "location": {
+                    "latitude": 47.6015,
+                    "longitude": -122.3304
+                },
+                "subdivisions": [
+                    {
+                        "name": "Washington"
+                    }
+                ]
+            }
+        },
+        {
+            "address": "23.216.147.62",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:08:20.356Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.412Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.367Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.401Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.401Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.401Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.401Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.401Z",
+                        "status": 5
+                    }
+                ]
+            },
+            "geo_info": {
+                "country": {
+                    "name": "United States"
+                },
+                "city": {
+                    "name": "Seattle"
+                },
+                "location": {
+                    "latitude": 47.6015,
+                    "longitude": -122.3304
+                },
+                "subdivisions": [
+                    {
+                        "name": "Washington"
+                    }
+                ]
+            }
+        },
+        {
+            "address": "23.40.197.137",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:08:20.733Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.196Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.742Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.780Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.780Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.780Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.780Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:20.780Z",
+                        "status": 5
+                    }
+                ]
+            },
+            "geo_info": {
+                "country": {
+                    "name": "United States"
+                },
+                "city": {
+                    "name": "Seattle"
+                },
+                "location": {
+                    "latitude": 47.6015,
+                    "longitude": -122.3304
+                },
+                "subdivisions": [
+                    {
+                        "name": "Washington"
+                    }
+                ]
+            }
+        },
+        {
+            "address": "20.99.133.109",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:08:21.522Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.580Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.531Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.559Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.559Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.559Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.559Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.559Z",
+                        "status": 5
+                    }
+                ]
+            },
+            "geo_info": {
+                "country": {
+                    "name": "United States"
+                },
+                "city": {
+                    "name": "Quincy"
+                },
+                "location": {
+                    "latitude": 47.20603,
+                    "longitude": -119.79934
+                },
+                "subdivisions": [
+                    {
+                        "name": "Washington"
+                    }
+                ]
+            }
+        },
+        {
+            "address": "192.229.211.108",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:08:21.894Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "trustworthy",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.950Z",
+                        "status": 0
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.904Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.928Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.928Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.928Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.928Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:08:21.928Z",
+                        "status": 5
+                    }
+                ]
+            },
+            "geo_info": {
+                "country": {
+                    "name": "United States"
+                },
+                "city": {
+                    "name": "Bakersfield"
+                },
+                "location": {
+                    "latitude": 35.33226,
+                    "longitude": -119.02249
+                },
+                "subdivisions": [
+                    {
+                        "name": "California"
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -1,4 +1,4 @@
-from src.shared import load_config, parse_config_file, METADF_KEY, METADF_DISABLED
+from src.shared import load_config, parse_config_file, METADF_KEY, METADF_DISABLED, SUPRESS_WARNINGS
 from src.shared import Dbg, Colour as C
 import requests, time, json, enum
 from prettytable.colortable import ColorTable
@@ -42,12 +42,16 @@ class MetaDefenderCloud:
     data = load_config()
     key = parse_config_file(data[METADF_KEY])
     disable_md = parse_config_file(data[METADF_DISABLED])
+    warnings = parse_config_file(data[SUPRESS_WARNINGS])
 
     if key != None:
       self.api_key[1] = key
 
     if disable_md != None:
       self.disabled = bool(disable_md)
+
+    if warnings != None:
+      self.supress_warnings = bool(warnings)
 
 
   def is_apikey_loaded(self) -> bool:
@@ -62,6 +66,7 @@ class MetaDefenderCloud:
     self.debug = debug
     self.raw_json = raw_json
     self.disabled = disabled
+    self.supress_warnings = False
     self.api_key = ["apikey", ""]
 
   

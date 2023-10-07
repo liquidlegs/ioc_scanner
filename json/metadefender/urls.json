@@ -1,0 +1,705 @@
+{
+    "data": [
+        {
+            "address": "http://www.google.com",
+            "lookup_results": {
+                "start_time": "2023-09-27T11:00:50.490Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "trustworthy",
+                        "category": "Search Engines",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:00:50.492Z",
+                        "status": 0
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:00:50.499Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:00:50.524Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:00:50.524Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:00:50.524Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:00:50.524Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T11:00:50.524Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "https://threatfox.abuse.ch/ioc/1148923",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:19.824Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "trustworthy",
+                        "category": "Computer and Internet Security",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.899Z",
+                        "status": 0
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.836Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.858Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.858Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.858Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.858Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.858Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "https://stackoverflow.com/questions/3320406/how-to-check-if-a-path-is-absolute-path-or-relative-path-in-a-cross-platform-way",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:19.900Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "trustworthy",
+                        "category": "Computer and Internet Info",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.966Z",
+                        "status": 0
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.910Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.930Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.930Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.930Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.930Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.930Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://216.128.145.196/~wellseconds/?p=7982",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:19.967Z",
+                "detected_by": 2,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "high risk",
+                        "category": "Phishing and Other Frauds",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.032Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.976Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.996Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.996Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.996Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.996Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:19.996Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://47.99.160.202:50002/match",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.033Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.104Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.043Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.062Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.062Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.062Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.062Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.062Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://154.49.137.173/4db/request0flower/js832/18/apisecure/31central/pollpythonlocal/8windows/processortrack/2/apidownloads.php",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.105Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.163Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.113Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.131Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.131Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.131Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.131Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.131Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://wisthardem.wiki",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.164Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.286Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.172Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.195Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.195Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.195Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.195Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.195Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://yelkafeelind.com",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.287Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.356Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.301Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.317Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.317Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.317Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.317Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.317Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://stelkaret.com",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.357Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.429Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.369Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.386Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.386Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.386Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.386Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.386Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://cloudflare.com",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.430Z",
+                "detected_by": 0,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "trustworthy",
+                        "category": "Computer and Internet Security",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.433Z",
+                        "status": 0
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.441Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.462Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.462Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.462Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.462Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.462Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://cheenzocan.com",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.462Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.523Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.471Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.491Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.491Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.491Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.491Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.491Z",
+                        "status": 5
+                    }
+                ]
+            }
+        },
+        {
+            "address": "http://adaisreal.ddns.net",
+            "lookup_results": {
+                "start_time": "2023-09-27T13:34:20.524Z",
+                "detected_by": 1,
+                "sources": [
+                    {
+                        "provider": "webroot.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.600Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "avira.com",
+                        "assessment": "Malware",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.535Z",
+                        "status": 1
+                    },
+                    {
+                        "provider": "reputation.alienvault.com",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.566Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "danger.rulez.sk",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.566Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "feodotracker.abuse.ch",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.566Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "spamhaus.org",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.566Z",
+                        "status": 5
+                    },
+                    {
+                        "provider": "isc.sans.edu",
+                        "assessment": "",
+                        "detect_time": "",
+                        "update_time": "2023-09-27T13:34:20.566Z",
+                        "status": 5
+                    }
+                ]
+            }
+        }
+    ]
+}

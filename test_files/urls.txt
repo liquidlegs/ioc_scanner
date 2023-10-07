@@ -10,3 +10,11 @@ stelkaret.com
 cloudflare.com
 cheenzocan.com
 adaisreal.ddns.net
+install.realproheros.com
+api.realproheros.com
+login.secureway.fun
+files.secureway.fun
+api.safeit.com/install/log?error=
+169.239.129.108:5555/socket.io/?transport=websocket
+169.239.129.108:5555/socket.io/?transport=polling
+169.239.129.108:5555/client/config
