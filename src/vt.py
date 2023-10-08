@@ -372,6 +372,8 @@ class VirusTotal:
       return out
     except KeyError:
       return ""
+    except TypeError:
+      return ""
 
 
   def separate_string(input: str) -> str:
@@ -386,7 +388,7 @@ class VirusTotal:
 
   def url_get_vtintel_quickscan(urls: list):
     '''Displays basic information and threat scores of each specified URL to the screen.'''
-    print(f"Starting quickscan with {len(urls)} valid urls")
+    print(f"Starting scan with {len(urls)} valid urls")
 
     table = ColorTable()
     table.align = "l"
@@ -507,7 +509,7 @@ class VirusTotal:
 
   def domain_get_vtintel_quickscan(domains: list):
     '''Displays basic information and threat scores of each specified Domain to the screen.'''
-    print(f"Starting quickscan with {len(domains)} valid urls")
+    print(f"Starting scan with {len(domains)} valid domains")
 
     table = ColorTable()
     table.align = "l"
@@ -600,8 +602,14 @@ class VirusTotal:
           if rep < 0:
             rep = C.b_red(C.f_white(rep))
 
-          l_cert = datetime.fromtimestamp(last_cert).strftime("%Y-%m-%d")
-          c_date = datetime.fromtimestamp(create_date).strftime("%Y-%m-%d")
+          l_cert = ""
+          c_date = ""
+
+          if last_cert != None and last_cert != "":
+            l_cert = datetime.fromtimestamp(last_cert).strftime("%Y-%m-%d")
+            
+          if create_date != None and create_date != "":
+            c_date = datetime.fromtimestamp(create_date).strftime("%Y-%m-%d")
           
           table.add_row([domain, malicious, sus, harm, cat, l_cert, c_date, rep, dns_records, tags])
           rows += 1
@@ -618,7 +626,7 @@ class VirusTotal:
   @staticmethod
   def url_get_quickscan(urls: list):
     '''Displays basic information and threat scores of each specified URL to the screen.'''
-    print(f"Starting quickscan with {len(urls)} valid urls")
+    print(f"Starting scan with {len(urls)} valid urls")
 
     table = ColorTable()
     table.align = "l"
@@ -684,7 +692,7 @@ class VirusTotal:
   @staticmethod
   def file_get_quickscan(hashes: str) -> str:
     '''Displays basic information and threat scores of each specified file hash to the screen.'''
-    print(f"Starting quickscan with {len(hashes)} valid file hashes")
+    print(f"Starting scan with {len(hashes)} valid file hashes")
 
     table = ColorTable()
     table.align = "l"
@@ -737,7 +745,10 @@ class VirusTotal:
         section = VirusTotal.check_json_error(pe_info, "sections")
         import_list = VirusTotal.check_json_error(pe_info, "import_list")
         export_list = VirusTotal.check_json_error(pe_info, "exports")
-        entry = f"0x{VirusTotal.check_json_error(pe_info, 'entry_point')}"
+        entry = {VirusTotal.check_json_error(pe_info, 'entry_point')}
+
+        if entry != None and entry != "":
+          entry = f"0x{entry}"
 
         names = ""
         imports = 0
@@ -777,7 +788,6 @@ class VirusTotal:
 
         hash = C.f_green(hash)
         entry = C.fd_yellow(entry)
-
 
         table.add_row([hash, o_mal, o_sus, o_harm, names, type_d, threat_label, sections, imports, exports, entry, rep])
         rows += 1

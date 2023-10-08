@@ -57,109 +57,29 @@ def test_connection(args):
     MetaDefenderCloud.show_apikey_info(mapikey_info)
 
 
-# def hash_args(args):
-#   dbg = Dbg(args.debug)
-#   dbg.dprint("Hash parsing")
-
-#   # vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
-#   # vt.init()
-
-#   file_hashes = []
-  
-#   # Code block handles file hashes entered in from the commandline.
-#   if args.iocs != None:
-#     # First few lines check if the hash(es) are splitable and adds them to the file_hashes list.
-#     chk = is_arg_list(args.iocs)
-    
-#     if chk == True:
-#       file_hashes.extend(get_items_from_cmd(args.iocs, D_LIST, Item.Hash))
-
-#     # IF input is not splitable, the entire linel be added to the file_hashes list.
-#     else:
-#       result = args.iocs
-#       if result != None:
-#         file_hashes.append(result)
-
-
-#   elif args.file != None:
-#     # Attempts to read the text file and split each line with CRLF or LF.
-#     content = get_file_contents(args.file, D_CRLF)
-#     if len(content) < 2:
-#       content = get_file_contents(args.file, D_LF)
-    
-#     if len(content) < 2:
-#       print(f"{C.f_red('Error')}: unable to split each line by CRLF ('\r\n') or LF ('\n')")
-#       return
-    
-#     # All hashes are added to the file_hashes list.
-#     file_hashes.extend(get_items_from_list(content, Item.Hash))
-
-#   vt_hash_args(args, file_hashes)
-#   md_hash_args(args, file_hashes)
-
-
-# def url_args(args):
-#   dbg = Dbg(args.debug)
-#   dbg.dprint("Url parsing")
-
-#   # vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
-#   # vt.init()
-
-#   urls = []
-
-#   if args.iocs != None:
-#     # First few lines check if the url(s) are splitable and adds them to the urls list.
-#     chk = is_arg_list(args.iocs)
-
-#     if chk == True:
-#       urls.extend(get_items_from_cmd(args.iocs, D_LIST, Item.Url))
-
-#     # IF input is not splitable, the entire line be added to the urls list.
-#     else:
-#       result = validate_url(args.iocs)
-#       if result != None:
-#         urls.append(result)
-
-
-#   elif args.file != None:
-#     # Input is read from a file and a list is returned containing each line.
-#     content = get_file_contents(args.file, D_CRLF)
-#     if len(content) < 2:
-#       content = get_file_contents(args.file, D_LF)
-
-#     if len(content) < 2:
-#       print(f"{C.f_red('Error')}: unable to split each line by CRLF ('\r\n') or LF ('\n')")
-#       return
-    
-#     # The process here is the same as the comment above.
-#     # Only the method to get the data in script is different.
-#     urls.extend(get_items_from_list(content, Item.Url))
-  
-#   vt_url_args(args, urls)
-#   md_url_args(args, urls)
-
-
-def get_arg_items(args, item: ItemType):
+def get_arg_items(args, item: Item):
+  dbg = Dbg(args.debug)
   output = []
 
   # Code block handles file hashes entered in from the commandline.
   if args.iocs != None:
     # First few lines check if the hash(es) are splitable and adds them to the file_hashes list.
     chk = is_arg_list(args.iocs)
-    
+    dbg.dprint(f"Are items separated by commas: {chk}")
+
     if chk == True:
-      output.extend(get_items_from_cmd(args.iocs, D_LIST, item))
+      output.extend(get_items_from_cmd(args.debug, args.iocs, D_LIST, item))
 
     else:
       results = None
       domain = None
       
-      if item == ItemType.IP:
+      if item == Item.Ip:
         results = validate_ip(args.iocs)
-      elif item == ItemType.URL:
+      elif item == Item.Url:
         results = validate_url(args.iocs)
         domain = validate_domain(args.iocs)
-      elif item == ItemType.HASH:
+      elif item == Item.Hash:
         results = validate_hash(args.iocs)
 
       if results != None:
@@ -178,40 +98,40 @@ def get_arg_items(args, item: ItemType):
     if len(content) < 2:
       print(f"{C.f_yellow('Warning')}: unable to split each line by CRLF ('\\r\\n') or LF ('\\n')")
     
-    if item == ItemType.IP:
+    if item == Item.Ip:
       output.extend(get_items_from_list(content, Item.Ip))
-    if item == ItemType.URL:
+    if item == Item.Url:
       output.extend(get_items_from_list(content, Item.Url))
       output.extend(get_items_from_list(content, Item.Domain))
-    if item == ItemType.HASH:
+    if item == Item.Hash:
       output.extend(get_items_from_list(content, Item.Hash))
 
   return output
 
 
-def ioc_args(command: ItemType, args):
+def ioc_args(command: Item, args):
   dbg = Dbg(args.debug)
   items = []
 
-  if command == ItemType.IP:
+  if command == Item.Ip:
     dbg.dprint("IP parsing")
-    items = get_arg_items(args, ItemType.IP)
+    items = get_arg_items(args, Item.Ip)
     
     if items != None:
       vt_ip_args(args, items)
       md_ip_args(args, items)    
   
-  elif command == ItemType.URL:
+  elif command == Item.Url:
     dbg.dprint("URL parsing")
-    items = get_arg_items(args, ItemType.URL)
+    items = get_arg_items(args, Item.Url)
     
     if items != None:
       vt_url_args(args, items)
       md_url_args(args, items)
   
-  elif command == ItemType.HASH:
+  elif command == Item.Hash:
     dbg.dprint("Hash parsing")
-    items = get_arg_items(args, ItemType.HASH)
+    items = get_arg_items(args, Item.hash)
     
     if items != None:
       vt_hash_args(args, items)
@@ -303,14 +223,14 @@ def vt_hash_args(args, file_hashes: list):
       print(vt_disabled_w)
 
 
-def get_url_response_type(url: str) -> ItemType:
+def get_url_response_type(url: str) -> Item:
   try:
   
     item_t = url["type"]
     if item_t == "url":
-      return ItemType.URL
+      return Item.Url
     elif item_t == "domain":
-      return ItemType.DOMAIN
+      return Item.Domain
   
   except KeyError:
     return None
@@ -331,9 +251,9 @@ def sort_urls_and_domains(responses: list, debug=False) -> [list, list]:
         if debug == True:
           Dbg._dprint(f"JSON response type is {item_t}")
 
-        if item_t == ItemType.URL:
+        if item_t == Item.Url:
           urls.append(resp)
-        elif item_t == ItemType.DOMAIN:
+        elif item_t == Item.Domain:
           domains.append(resp)
 
   except KeyError:

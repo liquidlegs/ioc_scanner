@@ -64,16 +64,18 @@ def validate_url(url: str) -> str:
 def validate_domain(domain: str) -> str:
   '''Function checks if the provided string is a valid domain.'''
   try:
-    out = re.search(r"(^\w+[a-zA-Z0-9.]+\.\w+$)", domain).group(0)
+    out = re.search(r"(^\w+[a-zA-Z0-9.-]+\.\w+$)", domain).group(0)
     return out
   except AttributeError:
     return None
 
 
-def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
+def get_items_from_cmd(debug: bool, istring: str, delim: str, cmd_item: Item) -> list[str]:
   '''Splits ip address received from the commandline and returns them as a list.'''
+  dbg = Dbg(debug)
   out = []
   temp_items = istring.split(delim)
+  dbg.dprint(f"Attempting to split commandline items {temp_items}")
 
   if cmd_item == Item.Ip:
     for ip in temp_items:
@@ -81,7 +83,6 @@ def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
       
       if result != None:
         out.append(result)
-
   
   elif cmd_item == Item.Hash:
     out.extend(temp_items)
@@ -90,14 +91,9 @@ def get_items_from_cmd(istring: str, delim: str, cmd_item: Item) -> list[str]:
   elif cmd_item == Item.Url:
     for url in temp_items:
       result = validate_url(url)
-      
-      if result != None:
-        out.append(result)
 
-
-  elif cmd_item == Item.Domain:
-    for domain in temp_items:
-      result = validate_domain(domain)
+      if result == None:
+        result = validate_domain(url)
       
       if result != None:
         out.append(result)

@@ -2,7 +2,7 @@
 
 import argparse
 from src.shared import Colour as C
-from src.arguments import ioc_args, test_connection, ItemType
+from src.arguments import ioc_args, test_connection, Item
 
 def main():
   parser = argparse.ArgumentParser(description="none")
@@ -29,11 +29,11 @@ def main():
 
   args = parser.parse_args()
   if args.command == "hash":
-    ioc_args(ItemType.HASH, args)
+    ioc_args(Item.Hash, args)
   elif args.command == "url":
-    ioc_args(ItemType.URL, args)
+    ioc_args(Item.Url, args)
   elif args.command == "ip":
-    ioc_args(ItemType.IP, args)
+    ioc_args(Item.Ip, args)
   elif args.test == True:
     test_connection(args)
 
