@@ -23,7 +23,7 @@ class MdfApiErr(enum.Enum):
   EndpointNotFound = 3
 
 
-class MetaDefenderCloud:
+class MetaDefenderCloud(Dbg):
   
   BASE_IP_PTH_SINGLE = "https://api.metadefender.com/v4/ip/{ip}"
   BASE_IP_PTH_BULK = "https://api.metadefender.com/v4/ip/"
@@ -39,7 +39,8 @@ class MetaDefenderCloud:
 
   def init(self):
     '''Reads the config file and parses the json to retrieve the VT API key.'''
-    data = load_config()
+    data_pair = load_config()
+    data = data_pair[0]
     key = parse_config_file(data[METADF_KEY])
     disable_md = parse_config_file(data[METADF_DISABLED])
     warnings = parse_config_file(data[SUPRESS_WARNINGS])
@@ -68,11 +69,6 @@ class MetaDefenderCloud:
     self.disabled = disabled
     self.supress_warnings = False
     self.api_key = ["apikey", ""]
-
-  
-  def dprint(self, text: str):
-    if self.debug == True:
-      Dbg._dprint(text)
 
 
   def get_error_code(code: int) -> MdfApiErr:

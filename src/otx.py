@@ -1,5 +1,5 @@
 from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, ALIEN_VAULT_DISABLED, SUPRESS_WARNINGS
-from src.shared import Colour as C, Item
+from src.shared import Colour as C, Item, Dbg, check_json_error
 import requests
 import enum, json
 from prettytable.colortable import ColorTable
@@ -33,7 +33,7 @@ class Ip(enum.Enum):
   V6 = 1
 
 
-class AlienVault:
+class AlienVault(Dbg):
 
   IND_IPv4 = "https://otx.alienvault.com/api/v1/indicators/IPv4/{ip}/{section}"
   IND_IPv6 = "https://otx.alienvault.com/api/v1/indicators/IPv6/{ip}/{section}"
@@ -48,10 +48,10 @@ class AlienVault:
   FORM_HDR = ("content-type", "application/x-www-form-urlencoded")
 
   
-  @classmethod
   def init(self):
     '''Reads the config file and parses the json to retrieve the OTX API key.'''
-    data = load_config()
+    data_pair = load_config()
+    data = data_pair[0]
     key = parse_config_file(data[ALIEN_VAULT_KEY])
     disable_otx = parse_config_file(data[ALIEN_VAULT_DISABLED])
     warnings = parse_config_file(data[SUPRESS_WARNINGS])
@@ -60,13 +60,12 @@ class AlienVault:
       self.api_key[1] = key
 
     if disable_otx != None:
-      self.disabled = disable_otx
+      self.disabled = bool(disable_otx)
 
     if warnings != None:
-      self.supress_warnings = warnings
+      self.supress_warnings = bool(warnings)
 
 
-  @classmethod
   def is_apikey_loaded(self) -> bool:
     length = len(self.api_key[1])
     if length > 0:
@@ -75,17 +74,12 @@ class AlienVault:
       return False
 
 
-  @classmethod
   def __init__(self, debug=False, raw_json=False, disabled=False):
     self.debug = debug
     self.raw_json = raw_json
     self.disabled = disabled
     self.supress_warnings = False
     self.api_key = ["X-OTX-API-KEY", ""]
-
-
-  def get_ip_quickscan():
-    pass
 
 
   def handle_otx_error(self, data: str, indicator: Indicator) -> OtxApiErr:
@@ -138,7 +132,6 @@ class AlienVault:
     elif ind == Indicator.nids_list:
       base_url = base_url.replace("{section}", "nids_list")
 
-    # print(f"url: {base_url}")
     req = requests.get(base_url, headers={
       self.JSON_HDR[0]: self.JSON_HDR[1],
       self.api_key[0]: self.api_key[1]
@@ -152,17 +145,28 @@ class AlienVault:
     out = []
 
     for address in ips:
-      pulses = self.get_ip_indicators(Ip.V4, address, Indicator.general)
-      http_scans = self.get_ip_indicators(Ip.V4, address, Indicator.http_scans)
-      passive_dns = self.get_ip_indicators(Ip.V4, address, Indicator.passive_dns)
-      malware_s = self.get_ip_indicators(Ip.V4, address, Indicator.malware)      
+      pulses = self.get_ip_indicators(Ip.V4, address, Indicator.reputation)
+      # http_scans = self.get_ip_indicators(Ip.V4, address, Indicator.http_scans)
+      # passive_dns = self.get_ip_indicators(Ip.V4, address, Indicator.passive_dns)
+      # malware_s = self.get_ip_indicators(Ip.V4, address, Indicator.malware)      
 
-      out.append([pulses, http_scans, passive_dns, malware_s])
-    
+      # out.append([pulses, http_scans, passive_dns, malware_s])
+      data = json.loads(pulses)
+      self.handle_otx_error(json.dumps(data, indent=2), Indicator.general)
+      out.append(data)
+
     return out
 
 
   def get_ip_quickscan(ips: list):
+    print(f"Scanning {len(ips)} valid ips")
+
+    table = ColorTable()
+    table.align = "l"
+    table.field_names = [
+
+    ]
+
     pass
 
 

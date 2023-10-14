@@ -1,12 +1,15 @@
 from src.vt import VirusTotal, VtApiErr
-from src.avt import AlienVault, Ip, Indicator
+from src.otx import AlienVault, Ip, Indicator
 from src.md import MetaDefenderCloud, ItemType, MdfApiErr
-from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg, ArgType
+from src.tfx import ThreatFox
+from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg, FeatureList, FeatureState, save_config_file
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd, validate_domain, validate_hash
 import json
 
 metadef_disabled_w = f"{C.f_yellow('Warning')}: MetaDefenderCloud is disabled... Skipping"
-vt_disabled_w = f"{C.f_red('Error')}: Virus Total has been disabled... Skipping."
+vt_disabled_w = f"{C.f_yellow('Warning')}: Virus Total has been disabled... Skipping."
+otx_disabled_w = f"{C.f_yellow('Warning')}: AlienVault has been disabled... Skipping."
+tfx_disabled_w = f"{C.f_yellow('Warning')}: ThreatFox has been disabled... Skipping."
 
 def check_flags(args):
   '''Function determines if global flags have been specified. If not, behaviour defaults to displaying the quickscan for the corresponding ioc'''
@@ -18,6 +21,53 @@ def check_flags(args):
     out += 1
   
   return out
+
+
+def toggle_features(args):
+  dbg = Dbg(args.debug)
+  key = args.toggle.lower()
+  state = FeatureState.Toggle
+  feature = FeatureList.Nan
+
+  if key == "vt":
+    dbg.dprint("toggle Virus Total")
+    feature = FeatureList.Vt
+    state = FeatureState.Toggle
+  
+  elif key == "otx":
+    dbg.dprint("toggle Alien Vault")
+    feature = FeatureList.Otx
+    state = FeatureState.Toggle
+  
+  elif key == "md":
+    dbg.dprint("toggle MetaDefender")
+    feature = FeatureList.Md
+    state = FeatureState.Toggle
+  
+  elif key == "tfx":
+    dbg.dprint("toggle Threat Fox")
+    feature = FeatureList.Tfx
+    state = FeatureState.Toggle
+  
+  elif key == "warnings":
+    dbg.dprint("toggle Warnings")
+    feature = FeatureList.Warnings
+    state = FeatureState.Toggle
+  
+  elif key == "enable_all":
+    dbg.dprint("enable all features")
+    state = FeatureState.Enabled
+  
+  elif key == "disable_all":
+    dbg.dprint("disable all features")
+    state = FeatureState.Disabled
+
+  else:
+    print(f"{C.f_red('Error')}: unknown feature - {C.fd_cyan(key)}")
+    return
+  
+  dbg.dprint(f"{feature}/{state}")
+  save_config_file(args.debug, feature, state)
 
 
 def test_connection(args):
@@ -120,6 +170,8 @@ def ioc_args(command: Item, args):
     if items != None:
       vt_ip_args(args, items)
       md_ip_args(args, items)    
+      otx_ip_args(args, items)
+      query_tfx_ioc(args, items)
   
   elif command == Item.Url:
     dbg.dprint("URL parsing")
@@ -131,7 +183,7 @@ def ioc_args(command: Item, args):
   
   elif command == Item.Hash:
     dbg.dprint("Hash parsing")
-    items = get_arg_items(args, Item.hash)
+    items = get_arg_items(args, Item.Hash)
     
     if items != None:
       vt_hash_args(args, items)
@@ -360,4 +412,56 @@ def otx_hash_args(args, hashes: list):
 
 
 def otx_ip_args(args, ips: list):
-  pass
+  dbg = Dbg(args.debug)
+  dbg.dprint("calling otx ip")
+
+  otx = AlienVault(args.debug, args.raw_json)
+  otx.init()
+  
+  dbg.dprint(f"Otx has been initalized")
+  dbg.dprint(f"OTX disabled: {otx.disabled}")
+  dbg.dprint(f"raw_json: {otx.raw_json}")
+
+  if otx.disabled == False:
+    responses = []
+
+    if len(ips) < 1:
+      print(f"{C.f_red('Error')}: No valid ips to scan")
+      return
+    
+    dbg.dprint(f"Sending {len(ips)} to AlienVault")
+    responses.extend(otx.collect_ip_responses(ips))
+
+    if check_flags(args) < 1:
+      AlienVault.get_ip_quickscan(responses)    
+
+  else:
+    if otx.supress_warnings == False:
+      print(otx_disabled_w)
+
+
+def query_tfx_ioc(args, iocs: list):
+  dbg = Dbg(args.debug)
+  dbg.dprint("Querying ThreatFox for IOCs")
+
+  tfx = ThreatFox(args.debug, args.raw_json)
+  tfx.init()
+  
+  dbg.dprint(f"ThreatFox has been initalized")
+  dbg.dprint(f"ThreatFox disabled: {tfx.disabled}")
+  dbg.dprint(f"raw_json: {tfx.raw_json}")
+
+  if tfx.disabled == False:
+    responses = []
+    
+    if len(iocs) < 1:
+      dbg.dprint(f"{C.f_red('Error')}: No valid IOCs to scan")
+      return
+    
+    responses.extend(tfx.collect_ioc_responses(iocs))
+    
+    dbg.dprint(f"Sending {len(iocs)} to ThreatFox")
+    ThreatFox.get_ioc_quickscan(responses)
+  else:
+    if tfx.supress_warnings == False:
+      print(tfx_disabled_w)

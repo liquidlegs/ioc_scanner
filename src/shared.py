@@ -12,9 +12,39 @@ ALIEN_VAULT_DISABLED = "disable_otx"
 METADF_KEY = "md_api_key"
 METADF_DISABLED = "disable_md"
 SUPRESS_WARNINGS = "supress_warnings"
+THREAT_FOX_KEY = "tfx_api_key"
+THREAT_FOX_DISABLED = "disable_tfx"
 D_CRLF = "\r\n"
 D_LF = "\n"
 D_LIST = ","
+
+
+class FeatureList(enum.Enum):
+  Nan = 0
+  Vt = 1
+  Otx = 2
+  Md = 3
+  Tfx = 4
+  Warnings = 5
+
+
+class FeatureState(enum.Enum):
+  Enabled = 1
+  Disabled = 2
+  Toggle = 3
+
+
+class Dbg:
+
+  def __init__(self, debug=False):
+    self.debug = debug
+
+  def dprint(self, text: str):
+    if self.debug == True:
+      print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")
+        
+  def _dprint(text: str):
+    print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")
 
 
 class Item(enum.Enum):
@@ -70,6 +100,15 @@ def validate_domain(domain: str) -> str:
     return None
 
 
+def extract_date(date: str) -> str:
+  '''Function checks if the provided string is a valid domain.'''
+  try:
+    out = re.search(r"(\d{4}-\d{2}-\d{2})", date).group(0)
+    return out
+  except AttributeError:
+    return None
+
+
 def get_items_from_cmd(debug: bool, istring: str, delim: str, cmd_item: Item) -> list[str]:
   '''Splits ip address received from the commandline and returns them as a list.'''
   dbg = Dbg(debug)
@@ -99,7 +138,7 @@ def get_items_from_cmd(debug: bool, istring: str, delim: str, cmd_item: Item) ->
         out.append(result)
 
 
-  return out
+  return list(set(out))
 
 
 def get_items_from_list(content: list[str], file_item: Item) -> list[str]:
@@ -135,7 +174,7 @@ def get_items_from_list(content: list[str], file_item: Item) -> list[str]:
       out.append(line)
 
 
-  return out
+  return list(set(out))
 
 
 def get_file_contents(filepath: str, delim: str) -> list[str]:
@@ -186,7 +225,7 @@ def get_file_delim(data: str) -> str:
     return D_CRLF
 
 
-def load_config() -> str:
+def load_config() -> (str):
   '''Function loads the config file from the root of the project directory.'''
   buffer = ""
   delim = "/"
@@ -215,7 +254,6 @@ def load_config() -> str:
       with open(filepath, "r") as f:
         buffer = f.read()
     except FileNotFoundError:
-      # print(f"File not found: {filepath}")
       filepath = f"{pwd}{delim}{script}".replace(filename, "")
 
     # Attempts to find the config file by combining the current directory with the first argument supplied to the command line.
@@ -223,7 +261,6 @@ def load_config() -> str:
       with open(filepath, "r") as f:
         buffer = f.read()
     except FileNotFoundError:
-      # print(f"File not found: {filepath}")
       filepath = search_scanner_path(filename, filepath, delim) + "config.json"
       
     # Attempts to find the config file by working out how many directories the script needs to go back to get back to the root of the project.
@@ -231,7 +268,6 @@ def load_config() -> str:
       with open(filepath, "r") as f:
         buffer = f.read()
     except FileNotFoundError:
-      # print(f"File not found: {filepath}")
       pass
 
   data = None
@@ -241,7 +277,7 @@ def load_config() -> str:
   except json.decoder.JSONDecodeError:
     print(f"{Colour.f_red('Error')} Unable to read config file.")
   
-  return data
+  return (data, filepath)
 
 
 def get_script_name(pwd: str, arg: str, delim: str):
@@ -318,6 +354,133 @@ def parse_config_file(data: str) -> str:
       output = dt
   
   return output
+
+
+def get_feature_status(key: str, feature: FeatureList):
+  if feature == FeatureList.Vt:
+    value = bool(check_json_error(key, VIRUS_TOTAL_DISABLED))
+
+    if value == False:
+      print(f"{Colour.f_green('[+]')} Virus Total enabled")
+    else:
+      print(f"{Colour.f_red('[-]')} Virus Total disabled")
+  
+  elif feature == FeatureList.Otx:
+    value = bool(check_json_error(key, ALIEN_VAULT_DISABLED))
+
+    if value == False:
+      print(f"{Colour.f_green('[+]')} Alien Vault enabled")
+    else:
+      print(f"{Colour.f_red('[-]')} Alien Vault disabled")
+  
+  elif feature == FeatureList.Md:
+    value = bool(check_json_error(key, METADF_DISABLED))
+
+    if value == False:
+      print(f"{Colour.f_green('[+]')} MetaDefender enabled")
+    else:
+      print(f"{Colour.f_red('[-]')} MetaDefender disabled")
+  
+  elif feature == FeatureList.Tfx:
+    value = bool(check_json_error(key, THREAT_FOX_DISABLED))
+
+    if value == False:
+      print(f"{Colour.f_green('[+]')} Threat Fox enabled")
+    else:
+      print(f"{Colour.f_red('[-]')} Threat Fox disabled")
+  
+  elif feature == FeatureList.Warnings:
+    value = bool(check_json_error(key, SUPRESS_WARNINGS))
+
+    if value == False:
+      print(f"{Colour.f_green('[+]')} Warnings enabled")
+    else:
+      print(f"{Colour.f_red('[-]')} Warnings disabled")
+
+
+def save_config_file(debug: bool, feature: FeatureList, state: FeatureState):
+  dbg = Dbg(debug)
+  data_pair = load_config()
+  config = data_pair[0]
+  file_path = data_pair[1]
+
+  if state == FeatureState.Toggle:
+    if feature == FeatureList.Vt:
+      
+      value = bool(check_json_error(config, VIRUS_TOTAL_DISABLED))
+      if value == True:
+        config[VIRUS_TOTAL_DISABLED] = False
+      elif value == False:
+        config[VIRUS_TOTAL_DISABLED] = True
+
+    if feature == FeatureList.Otx:
+      
+      value = bool(check_json_error(config, ALIEN_VAULT_DISABLED))
+      if value == True:
+        config[ALIEN_VAULT_DISABLED] = False
+      elif value == False:
+        config[ALIEN_VAULT_DISABLED] = True
+
+    if feature == FeatureList.Md:
+      
+      value = bool(check_json_error(config, METADF_DISABLED))
+      if value == True:
+        config[METADF_DISABLED] = False
+      elif value == False:
+        config[METADF_DISABLED] = True
+
+    if feature == FeatureList.Tfx:
+      
+      value = bool(check_json_error(config, THREAT_FOX_DISABLED))
+      if value == True:
+        config[THREAT_FOX_DISABLED] = False
+      elif value == False:
+        config[THREAT_FOX_DISABLED] = True
+
+    if feature == FeatureList.Warnings:
+      
+      value = bool(check_json_error(config, SUPRESS_WARNINGS))
+      if value == True:
+        config[SUPRESS_WARNINGS] = False
+      elif value == False:
+        config[SUPRESS_WARNINGS] = True
+
+  elif state == FeatureState.Enabled:
+    config[VIRUS_TOTAL_DISABLED] = False
+    config[ALIEN_VAULT_DISABLED] = False
+    config[METADF_DISABLED] = False
+    config[THREAT_FOX_DISABLED] = False
+    config[SUPRESS_WARNINGS] = False
+
+  elif state == FeatureState.Disabled:
+    config[VIRUS_TOTAL_DISABLED] = True
+    config[ALIEN_VAULT_DISABLED] = True
+    config[METADF_DISABLED] = True
+    config[THREAT_FOX_DISABLED] = True
+    config[SUPRESS_WARNINGS] = True
+
+  new_config = json.dumps(config, indent=4)
+  with open(file_path, "w") as f:
+    b = f.write(new_config)
+
+    dbg.dprint(f"Successfully wrote {Colour.fd_cyan(b)} {Colour.fd_yellow('bytes to the config file at')} {Colour.fd_cyan(file_path)}")
+    temp_data = json.loads(new_config)
+    get_feature_status(temp_data, feature)
+
+    if state == FeatureState.Enabled:
+      print(f"{Colour.f_green('[+]')} all features are enabled")
+    elif state == FeatureState.Disabled:
+      print(f"{Colour.f_red('[-]')} all features are disabled")
+
+
+def check_json_error(data: str, key: str) -> str:
+  try:
+    out = data[key]
+    return out
+  except KeyError:
+    return ""
+  except TypeError:
+    return ""
 
 
 class ArgType(enum.Enum):
@@ -412,16 +575,3 @@ class Colour:
 
   def bd_white(text: str) -> str:
     return f"{Back.WHITE}{Style.NORMAL}{text}{Back.RESET}{Style.NORMAL}"
-  
-
-class Dbg:
-
-  def __init__(self, debug=False):
-    self.debug = debug
-
-  def dprint(self, text: str):
-    if self.debug == True:
-      print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")
-        
-  def _dprint(text: str):
-    print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")

@@ -2,7 +2,7 @@
 
 import argparse
 from src.shared import Colour as C
-from src.arguments import ioc_args, test_connection, Item
+from src.arguments import ioc_args, test_connection, Item, toggle_features
 
 def main():
   parser = argparse.ArgumentParser(description="none")
@@ -11,6 +11,7 @@ def main():
   parser.add_argument("-d", "--debug", action="store_true", help="Enables debug messages to be globally displayed")
   parser.add_argument("-r", "--raw-json", action="store_true", help="View the raw json response from the VT API backend.")
   parser.add_argument("--av", action="store_true", help="View the list of vendors that have flagged an ioc.")
+  parser.add_argument("-T", "--toggle", action="store", help="Enable or disable a feature. Possible options [vt, otx, md, tfx, warnings, enable_all, disable_all]")
   subparsers = parser.add_subparsers(dest="command", help="query the VT api for information about files, hashes, IPs and URLs", required=False)
 
   file_parser = subparsers.add_parser("hash")
@@ -36,6 +37,8 @@ def main():
     ioc_args(Item.Ip, args)
   elif args.test == True:
     test_connection(args)
+  elif args.toggle != None:
+    toggle_features(args)
 
 
 if __name__ == '__main__':

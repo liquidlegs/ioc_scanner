@@ -2,8 +2,10 @@
     "vt_api_key": "$VT_KEY",
     "otx_api_key": "$OTX_KEY",
     "md_api_key": "$METADF_KEY",
+    "tfx_api_key": "",
     "disable_md": true,
-    "disable_vt": false,
+    "disable_vt": true,
     "disable_otx": true,
+    "disable_tfx": false,
     "supress_warnings": true
 }

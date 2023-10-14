@@ -1,5 +1,5 @@
 from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY, VIRUS_TOTAL_DISABLED, SUPRESS_WARNINGS
-from src.shared import Colour as C, Item, Dbg
+from src.shared import Colour as C, Item, Dbg, check_json_error
 import requests, enum, json, time
 from prettytable.colortable import ColorTable
 from datetime import datetime
@@ -12,7 +12,7 @@ class VtApiErr(enum.Enum):
   AuthenticationRequired = 4
 
 
-class VirusTotal:
+class VirusTotal(Dbg):
 
   BASE_PTH_FILE_ATT = "https://www.virustotal.com/api/v3/files/"
   BASE_PTH_FILE_BEH = "https://www.virustotal.com/api/v3/files/"
@@ -27,7 +27,8 @@ class VirusTotal:
   @classmethod
   def init(self):
     '''Reads the config file and parses the json to retrieve the VT API key.'''
-    data = load_config()
+    data_pair = load_config()
+    data = data_pair[0]
     key = parse_config_file(data[VIRUS_TOTAL_KEY])
     disable_vt = parse_config_file(data[VIRUS_TOTAL_DISABLED])
     warnings = parse_config_file(data[SUPRESS_WARNINGS])
@@ -59,11 +60,6 @@ class VirusTotal:
     self.disabled = disabled
     self.supress_warnings = False
     self.api_key = ["x-apikey", ""]
-
-
-  def dprint(self, text: str):
-    if self.debug == True:
-      Dbg._dprint(text)
 
 
   @classmethod
@@ -361,19 +357,10 @@ class VirusTotal:
         continue
 
     if rows > 0:
+      print("Virus Total Results")
       print(table)
     else:
       print("Nothing to display")
-
-
-  def check_json_error(data: str, key: str) -> str:
-    try:
-      out = data[key]
-      return out
-    except KeyError:
-      return ""
-    except TypeError:
-      return ""
 
 
   def separate_string(input: str) -> str:
@@ -392,7 +379,7 @@ class VirusTotal:
 
     table = ColorTable()
     table.align = "l"
-    table.max_width = 120
+    # table.max_width = 120
     table._max_width = {
       C.f_yellow("URL"): 100,
       C.f_yellow("M"): 3,
@@ -429,18 +416,18 @@ class VirusTotal:
           url = C.f_green(att["url"])
           cat = ""
           
-          malicious = VirusTotal.check_json_error(stats, "malicious")
-          sus = VirusTotal.check_json_error(stats, "suspicious")
-          harm = VirusTotal.check_json_error(stats, "harmless")
+          malicious = check_json_error(stats, "malicious")
+          sus = check_json_error(stats, "suspicious")
+          harm = check_json_error(stats, "harmless")
 
-          code = VirusTotal.check_json_error(att, "last_http_response_code")
-          rep = VirusTotal.check_json_error(att, "reputation")
+          code = check_json_error(att, "last_http_response_code")
+          rep = check_json_error(att, "reputation")
 
-          categories = VirusTotal.check_json_error(att, "categories")
-          force_point = VirusTotal.check_json_error(categories, "Forcepoint ThreatSeeker")
-          sophos = VirusTotal.check_json_error(categories, "sophos")
-          verdict_c = VirusTotal.check_json_error(categories, "Xcitium Verdict Cloud")
-          root = VirusTotal.check_json_error(categories, "Webroot")
+          categories = check_json_error(att, "categories")
+          force_point = check_json_error(categories, "Forcepoint ThreatSeeker")
+          sophos = check_json_error(categories, "sophos")
+          verdict_c = check_json_error(categories, "Xcitium Verdict Cloud")
+          root = check_json_error(categories, "Webroot")
 
           if force_point != None:
             cat += force_point
@@ -461,7 +448,7 @@ class VirusTotal:
             cat = cat[0:len(cat)-2]
 
           t_names = ""
-          threat_names = VirusTotal.check_json_error(att, "threat_names")
+          threat_names = check_json_error(att, "threat_names")
 
           for i in threat_names:
             t_names += i + ","
@@ -487,6 +474,7 @@ class VirusTotal:
         continue
 
     if rows > 0:
+      print("Virus Total Results")
       print(table)
     else:
       print("Nothing to display")
@@ -496,8 +484,8 @@ class VirusTotal:
     out = ""
 
     for i in records:
-      key_type = VirusTotal.check_json_error(i, "type")
-      value = VirusTotal.check_json_error(i, "value")
+      key_type = check_json_error(i, "type")
+      value = check_json_error(i, "value")
       
       out += f"{key_type}:{value}, "
 
@@ -519,7 +507,6 @@ class VirusTotal:
       C.f_yellow("S"),
       C.f_yellow("H"),
       C.f_yellow("Category"),
-      C.f_yellow("HTTPS_cert_date"),
       C.f_yellow("Created"),
       C.f_yellow("Rep"),
       C.f_yellow("DNS Records"),
@@ -532,7 +519,6 @@ class VirusTotal:
       C.f_yellow("S"): 8,
       C.f_yellow("H"): 8,
       C.f_yellow("Category"): 30,
-      C.f_yellow("HTTPS_cert_date"): 10,
       C.f_yellow("Created"): 10,
       C.f_yellow("Rep"): 8,
       C.f_yellow("DNS Records"): 60,
@@ -546,28 +532,27 @@ class VirusTotal:
         data = resp["data"]
         for idx in data:
           att = idx["attributes"]
-          stats = VirusTotal.check_json_error(att, "last_analysis_stats")
+          stats = check_json_error(att, "last_analysis_stats")
           cat = ""
           tags = ""
 
-          domain = VirusTotal.check_json_error(idx, "id")
+          domain = check_json_error(idx, "id")
           domain = C.f_green(domain)
 
-          last_cert = VirusTotal.check_json_error(att, "last_https_certificate_date")
-          create_date = VirusTotal.check_json_error(att, "creation_date")
-          rep = int(VirusTotal.check_json_error(att, "reputation"))
-          malicious = int(VirusTotal.check_json_error(stats, "malicious"))
-          sus = int(VirusTotal.check_json_error(stats, "suspicious"))
-          harm = int(VirusTotal.check_json_error(stats, "harmless"))
+          create_date = check_json_error(att, "creation_date")
+          rep = int(check_json_error(att, "reputation"))
+          malicious = int(check_json_error(stats, "malicious"))
+          sus = int(check_json_error(stats, "suspicious"))
+          harm = int(check_json_error(stats, "harmless"))
 
-          categories = VirusTotal.check_json_error(att, "categories")
-          force_point = VirusTotal.check_json_error(categories, "Forcepoint ThreatSeeker")
-          sophos = VirusTotal.check_json_error(categories, "sophos")
-          verdict_c = VirusTotal.check_json_error(categories, "Xcitium Verdict Cloud")
-          root = VirusTotal.check_json_error(categories, "Webroot")
-          alpha = VirusTotal.check_json_error(categories, "alphaMountain.ai")
+          categories = check_json_error(att, "categories")
+          force_point = check_json_error(categories, "Forcepoint ThreatSeeker")
+          sophos = check_json_error(categories, "sophos")
+          verdict_c = check_json_error(categories, "Xcitium Verdict Cloud")
+          root = check_json_error(categories, "Webroot")
+          alpha = check_json_error(categories, "alphaMountain.ai")
 
-          tag = VirusTotal.check_json_error(att, "tags")
+          tag = check_json_error(att, "tags")
           for i in tag:
             tags += i + " "
 
@@ -590,7 +575,7 @@ class VirusTotal:
             cat = VirusTotal.separate_string(cat)
             cat += alpha
 
-          records = VirusTotal.check_json_error(att, "last_dns_records")
+          records = check_json_error(att, "last_dns_records")
           dns_records = VirusTotal.unload_dns_records(records)
 
           if malicious > 0:
@@ -602,22 +587,19 @@ class VirusTotal:
           if rep < 0:
             rep = C.b_red(C.f_white(rep))
 
-          l_cert = ""
           c_date = ""
-
-          if last_cert != None and last_cert != "":
-            l_cert = datetime.fromtimestamp(last_cert).strftime("%Y-%m-%d")
             
           if create_date != None and create_date != "":
             c_date = datetime.fromtimestamp(create_date).strftime("%Y-%m-%d")
           
-          table.add_row([domain, malicious, sus, harm, cat, l_cert, c_date, rep, dns_records, tags])
+          table.add_row([domain, malicious, sus, harm, cat, c_date, rep, dns_records, tags])
           rows += 1
 
       except KeyError:
         continue
 
     if rows > 0:
+      print("Virus Total Results")
       print(table)
     else:
       print("Nothing to display")
@@ -675,6 +657,7 @@ class VirusTotal:
         continue
 
     if rows > 0:
+      print("Virus Total Results")
       print(table)
     else:
       print("Nothing to display")
@@ -735,17 +718,17 @@ class VirusTotal:
         hash = resp["data"]["id"]
         att = resp["data"]["attributes"]
         
-        popular_threat = VirusTotal.check_json_error(att, "popular_threat_classification")
-        threat_label = VirusTotal.check_json_error(popular_threat, "suggested_threat_label")
-        type_d = VirusTotal.check_json_error(att, "type_description")
-        tag = VirusTotal.check_json_error(att, "tags")
-        rep = int(VirusTotal.check_json_error(att, "reputation"))
+        popular_threat = check_json_error(att, "popular_threat_classification")
+        threat_label = check_json_error(popular_threat, "suggested_threat_label")
+        type_d = check_json_error(att, "type_description")
+        tag = check_json_error(att, "tags")
+        rep = int(check_json_error(att, "reputation"))
 
-        pe_info = VirusTotal.check_json_error(att, "pe_info")
-        section = VirusTotal.check_json_error(pe_info, "sections")
-        import_list = VirusTotal.check_json_error(pe_info, "import_list")
-        export_list = VirusTotal.check_json_error(pe_info, "exports")
-        entry = {VirusTotal.check_json_error(pe_info, 'entry_point')}
+        pe_info = check_json_error(att, "pe_info")
+        section = check_json_error(pe_info, "sections")
+        import_list = check_json_error(pe_info, "import_list")
+        export_list = check_json_error(pe_info, "exports")
+        entry = {check_json_error(pe_info, 'entry_point')}
 
         if entry != None and entry != "":
           entry = f"0x{entry}"
@@ -759,7 +742,7 @@ class VirusTotal:
         malicious = int(analysis["malicious"])
         suspicious = int(analysis["suspicious"])
         harmless = int(analysis["harmless"])
-        exe_names = VirusTotal.check_json_error(att, "names")
+        exe_names = check_json_error(att, "names")
 
         for i in exe_names:
           names += i + ","
@@ -767,7 +750,7 @@ class VirusTotal:
         names = VirusTotal.pop_string(names)
 
         for i in import_list:
-          functions = VirusTotal.check_json_error(i, "imported_functions")
+          functions = check_json_error(i, "imported_functions")
           imports += len(functions)
 
         o_mal = malicious
@@ -795,6 +778,7 @@ class VirusTotal:
         continue
 
     if rows > 0:
+      print("Virus Total Results")
       print(table)
     else:
       print("Nothing to display")
