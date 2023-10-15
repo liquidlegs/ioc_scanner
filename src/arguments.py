@@ -1,8 +1,9 @@
 from src.vt import VirusTotal, VtApiErr
 from src.otx import AlienVault, Ip, Indicator
 from src.md import MetaDefenderCloud, ItemType, MdfApiErr
-from src.tfx import ThreatFox
-from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg, FeatureList, FeatureState, save_config_file
+from src.tfx import ThreatFox, QueryType
+from prettytable.colortable import ColorTable
+from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg, FeatureList, FeatureState, save_config_file, load_config, check_json_error
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd, validate_domain, validate_hash
 import json
 
@@ -95,17 +96,6 @@ def test_connection(args):
     if args.otx_debug == True:
       print(out)
 
-  md = MetaDefenderCloud()
-  md.init()
-  mapikey_info = ""
-  
-  if md.is_apikey_loaded() == True and md.disabled == False:
-    print(f"{C.f_green('[+]')} Successfully found the MetaDefenderCloud API key")
-
-    mapikey_info = md.get_apikey_info()
-    print(f"metadefender enabled: {md.disabled}")
-    MetaDefenderCloud.show_apikey_info(mapikey_info)
-
 
 def get_arg_items(args, item: Item):
   dbg = Dbg(args.debug)
@@ -180,6 +170,7 @@ def ioc_args(command: Item, args):
     if items != None:
       vt_url_args(args, items)
       md_url_args(args, items)
+      query_tfx_ioc(args, items)
   
   elif command == Item.Hash:
     dbg.dprint("Hash parsing")
@@ -188,6 +179,7 @@ def ioc_args(command: Item, args):
     if items != None:
       vt_hash_args(args, items)
       md_hash_args(args, items)
+      query_tfx_ioc(args, items, QueryType.Hash)
 
 
 def md_ip_args(args, ips: list):
@@ -440,7 +432,7 @@ def otx_ip_args(args, ips: list):
       print(otx_disabled_w)
 
 
-def query_tfx_ioc(args, iocs: list):
+def query_tfx_ioc(args, iocs: list, qtype=QueryType.Other):
   dbg = Dbg(args.debug)
   dbg.dprint("Querying ThreatFox for IOCs")
 
@@ -465,3 +457,56 @@ def query_tfx_ioc(args, iocs: list):
   else:
     if tfx.supress_warnings == False:
       print(tfx_disabled_w)
+
+
+def get_feature_status():
+  pair = load_config()
+  data = pair[0]
+  
+  table = ColorTable()
+  table.align = "l"
+  table.field_names = [
+    C.f_yellow("Feature"),
+    C.f_yellow("Enabled")
+  ]
+
+  vt = bool(check_json_error(data, "disable_vt"))
+  md = bool(check_json_error(data, "disable_md"))
+  tf = bool(check_json_error(data, "disable_tfx"))
+  otx = bool(check_json_error(data, "disable_otx"))
+  warnings = bool(check_json_error(data, "supress_warnings"))
+
+  if vt == True:
+    vt = C.f_red("False")
+  else:
+    vt = C.f_green("True")
+
+  if md == True:
+    md = C.f_red("False")
+  else:
+    md = C.f_green("True")
+
+  if tf == True:
+    tf = C.f_red("False")
+  else:
+    tf = C.f_green("True")
+
+  if otx == True:
+    otx = C.f_red("False")
+  else:
+    otx = C.f_green("True")
+
+  if warnings == True:
+    warnings = C.f_red("False")
+  else:
+    warnings = C.f_green("True")
+
+  table.add_rows(
+    [[C.f_blue("Virus Total"), vt],
+    [C.f_green("Threat Fox"), tf],
+    [C.f_magenta("MetaDefender"), md],
+    [C.f_red("Alien Vault"), otx],
+    [C.fd_yellow("Suppress Warnings"), warnings]]
+  )
+
+  print(table)

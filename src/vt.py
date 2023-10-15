@@ -684,13 +684,9 @@ class VirusTotal(Dbg):
       C.f_yellow("M"), 
       C.f_yellow("S"), 
       C.f_yellow("H"), 
-      C.f_yellow("Name(s)"),
+      C.f_yellow("Name"),
       C.f_yellow("Type"),
       C.f_yellow("Threat Label"),
-      C.f_yellow("Sections"),
-      C.f_yellow("Imports"),
-      C.f_yellow("Exports"),
-      C.f_yellow("EntryPoint"),
       C.f_yellow("Rep")
     ]
 
@@ -699,13 +695,9 @@ class VirusTotal(Dbg):
       C.f_yellow("M"): 8, 
       C.f_yellow("S"): 8, 
       C.f_yellow("H"): 8, 
-      C.f_yellow("Name(s)"): 20,
+      C.f_yellow("Name"): 40,
       C.f_yellow("Type"): 15,
-      C.f_yellow("Threat Label"): 20,
-      C.f_yellow("Sections"): 8,
-      C.f_yellow("Imports"): 8,
-      C.f_yellow("Exports"): 8,
-      C.f_yellow("EntryPoint"): 8,
+      C.f_yellow("Threat Label"): 40,
       C.f_yellow("Rep"): 8
     }
 
@@ -721,37 +713,13 @@ class VirusTotal(Dbg):
         popular_threat = check_json_error(att, "popular_threat_classification")
         threat_label = check_json_error(popular_threat, "suggested_threat_label")
         type_d = check_json_error(att, "type_description")
-        tag = check_json_error(att, "tags")
         rep = int(check_json_error(att, "reputation"))
-
-        pe_info = check_json_error(att, "pe_info")
-        section = check_json_error(pe_info, "sections")
-        import_list = check_json_error(pe_info, "import_list")
-        export_list = check_json_error(pe_info, "exports")
-        entry = {check_json_error(pe_info, 'entry_point')}
-
-        if entry != None and entry != "":
-          entry = f"0x{entry}"
-
-        names = ""
-        imports = 0
-        exports = len(export_list)
-        sections = len(section)
 
         analysis = att["last_analysis_stats"]
         malicious = int(analysis["malicious"])
         suspicious = int(analysis["suspicious"])
         harmless = int(analysis["harmless"])
-        exe_names = check_json_error(att, "names")
-
-        for i in exe_names:
-          names += i + ","
-
-        names = VirusTotal.pop_string(names)
-
-        for i in import_list:
-          functions = check_json_error(i, "imported_functions")
-          imports += len(functions)
+        name = check_json_error(att, "meaningful_name")
 
         o_mal = malicious
         o_sus = suspicious
@@ -770,9 +738,8 @@ class VirusTotal(Dbg):
           rep = C.b_red(C.f_white(rep))
 
         hash = C.f_green(hash)
-        entry = C.fd_yellow(entry)
 
-        table.add_row([hash, o_mal, o_sus, o_harm, names, type_d, threat_label, sections, imports, exports, entry, rep])
+        table.add_row([hash, o_mal, o_sus, o_harm, name, type_d, threat_label, rep])
         rows += 1
       except KeyError:
         continue

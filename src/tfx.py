@@ -11,6 +11,11 @@ class TfxApiErr(enum.Enum):
   No_Json = 3
 
 
+class QueryType(enum.Enum):
+  Hash = 0
+  Other = 1
+
+
 class ThreatFox(Dbg):
   
   BASE_PTH_QUERY_IOC = "https://threatfox-api.abuse.ch/api/v1/"
@@ -51,7 +56,7 @@ class ThreatFox(Dbg):
     self.api_key = ["x-apikey", ""]
 
 
-  def query_ioc(self, ioc: str):
+  def query_ioc(self, ioc: str, qtype=QueryType.Other):
     base_url = self.BASE_PTH_QUERY_IOC
     
     header = {
@@ -59,9 +64,16 @@ class ThreatFox(Dbg):
       self.CNT_LEN_HDR: str(len(ioc))
     }
 
+    query_type = "search_ioc"
+    search = "search_term"
+
+    if qtype == QueryType.Hash:
+      query_type = "search_hash"
+      search = "hash"
+
     payload = {
-      "query": "search_ioc",
-      "search_term": ioc
+      "query": query_type,
+      search: ioc
     }
 
     start = time.time()
@@ -74,12 +86,12 @@ class ThreatFox(Dbg):
     return text
 
 
-  def collect_ioc_responses(self, iocs: list):
+  def collect_ioc_responses(self, iocs: list, qtype=QueryType.Other):
     responses = []
     err = TfxApiErr.Nan
     
     for i in iocs:
-      resp = self.query_ioc(i)
+      resp = self.query_ioc(i, qtype)
       err = self.handle_api_error(resp)
 
       if err == TfxApiErr.Ok or err == TfxApiErr.Nan:
@@ -204,10 +216,10 @@ class ThreatFox(Dbg):
         temp_first = ""
         temp_last = ""
 
-        if first != "":
+        if first != "" and first != None:
           temp_first = extract_date(first)
           
-        if last != "":
+        if last != "" and last != None:
           temp_last = extract_date(last)
 
         if temp_first != None:
