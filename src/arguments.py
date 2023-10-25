@@ -1,5 +1,5 @@
 from src.vt import VirusTotal, VtApiErr
-from src.otx import AlienVault, Ip, Indicator
+from src.otx import AlienVault, Ip, Indicator, IndicatorType
 from src.md import MetaDefenderCloud, ItemType, MdfApiErr
 from src.tfx import ThreatFox, QueryType
 from prettytable.colortable import ColorTable
@@ -25,6 +25,8 @@ def check_flags(args):
 
 
 def toggle_features(args):
+  '''Function sets a few enums that control how and what features will be disbaled or enabled in the config file.'''
+
   dbg = Dbg(args.debug)
   key = args.toggle.lower()
   state = FeatureState.Toggle
@@ -99,7 +101,10 @@ def test_connection(args):
 
 def get_arg_items(args, item: Item):
   dbg = Dbg(args.debug)
-  output = []
+  output = {
+    "ioc": [],
+    "domain": []
+  }
 
   # Code block handles file hashes entered in from the commandline.
   if args.iocs != None:
@@ -108,7 +113,7 @@ def get_arg_items(args, item: Item):
     dbg.dprint(f"Are items separated by commas: {chk}")
 
     if chk == True:
-      output.extend(get_items_from_cmd(args.debug, args.iocs, D_LIST, item))
+      output = get_items_from_cmd(args.debug, args.iocs, D_LIST, item)
 
     else:
       results = None
@@ -123,10 +128,10 @@ def get_arg_items(args, item: Item):
         results = validate_hash(args.iocs)
 
       if results != None:
-        output.append(results)
+        output["ioc"].append(results)
 
       if domain != None:
-        output.append(domain)
+        output["domain"].append(domain)
   
 
   elif args.file != None:
@@ -139,17 +144,19 @@ def get_arg_items(args, item: Item):
       print(f"{C.f_yellow('Warning')}: unable to split each line by CRLF ('\\r\\n') or LF ('\\n')")
     
     if item == Item.Ip:
-      output.extend(get_items_from_list(content, Item.Ip))
+      output["ioc"].extend(get_items_from_list(content, Item.Ip))
     if item == Item.Url:
-      output.extend(get_items_from_list(content, Item.Url))
-      output.extend(get_items_from_list(content, Item.Domain))
+      output["ioc"].extend(get_items_from_list(content, Item.Url))
+      output["domain"].extend(get_items_from_list(content, Item.Domain))
     if item == Item.Hash:
-      output.extend(get_items_from_list(content, Item.Hash))
+      output["ioc"].extend(get_items_from_list(content, Item.Hash))
 
   return output
 
 
 def ioc_args(command: Item, args):
+  '''Function begins the parsing process for each IOC and controls how each IOC is passed on the corresponding service.'''
+
   dbg = Dbg(args.debug)
   items = []
 
@@ -158,10 +165,10 @@ def ioc_args(command: Item, args):
     items = get_arg_items(args, Item.Ip)
     
     if items != None:
-      vt_ip_args(args, items)
-      md_ip_args(args, items)    
-      otx_ip_args(args, items)
-      query_tfx_ioc(args, items)
+      vt_ip_args(args, items["ioc"])
+      md_ip_args(args, items["ioc"])
+      otx_ip_args(args, items["ioc"])
+      query_tfx_ioc(args, items["ioc"])
   
   elif command == Item.Url:
     dbg.dprint("URL parsing")
@@ -170,16 +177,18 @@ def ioc_args(command: Item, args):
     if items != None:
       vt_url_args(args, items)
       md_url_args(args, items)
-      query_tfx_ioc(args, items)
+      otx_url_args(args, items)
+      query_tfx_ioc(args, items, QueryType.Url)
   
   elif command == Item.Hash:
     dbg.dprint("Hash parsing")
     items = get_arg_items(args, Item.Hash)
     
     if items != None:
-      vt_hash_args(args, items)
-      md_hash_args(args, items)
-      query_tfx_ioc(args, items, QueryType.Hash)
+      vt_hash_args(args, items["ioc"])
+      md_hash_args(args, items["ioc"])
+      otx_hash_args(args, items["ioc"])
+      query_tfx_ioc(args, items["ioc"], QueryType.Hash)
 
 
 def md_ip_args(args, ips: list):
@@ -257,53 +266,58 @@ def vt_hash_args(args, file_hashes: list):
     responses.extend(vt.collect_file_responses(file_hashes))
 
     if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Hash)
+      vt.get_av_detections(responses, Item.Hash)
 
     # Displays basic threat score if user enabled quick_scan.
     if check_flags(args) < 1:
-      VirusTotal.file_get_quickscan(responses)
+      vt.file_get_quickscan(responses)
   else:
     if vt.supress_warnings == False:
       print(vt_disabled_w)
 
 
-def get_url_response_type(url: str) -> Item:
-  try:
+# def get_url_response_type(url: str) -> Item:
+#   '''Function looks at each json response 'type' field to work out whether the information returned is for a url or a domain.'''
   
-    item_t = url["type"]
-    if item_t == "url":
-      return Item.Url
-    elif item_t == "domain":
-      return Item.Domain
+#   try:
   
-  except KeyError:
-    return None
-
-  return None
-
-
-def sort_urls_and_domains(responses: list, debug=False) -> [list, list]:
-  urls = []
-  domains = []
+#     item_t = url["type"]
+#     if item_t == "url":
+#       return Item.Url
+#     elif item_t == "domain":
+#       return Item.Domain
   
-  try:
-    for resp in responses:
-      data = resp["data"]
+#   except KeyError:
+#     return None
 
-      for i in data:
-        item_t = get_url_response_type(i)
-        if debug == True:
-          Dbg._dprint(f"JSON response type is {item_t}")
+#   return None
 
-        if item_t == Item.Url:
-          urls.append(resp)
-        elif item_t == Item.Domain:
-          domains.append(resp)
 
-  except KeyError:
-    pass
+# def vt_sort_urls_and_domains(responses: list, debug=False) -> [list, list]:
+#   '''Function looks inside each json response to work out whether the request was for a domain or a url.
+#   Once found, it will return a list of domains and urls to be parsed and displayed to the screen.'''
   
-  return [urls, domains]
+#   urls = []
+#   domains = []
+  
+#   try:
+#     for resp in responses:
+#       data = resp["data"]
+
+#       for i in data:
+#         item_t = get_url_response_type(i)
+#         if debug == True:
+#           Dbg._dprint(f"JSON response type is {item_t}")
+
+#         if item_t == Item.Url:
+#           urls.append(resp)
+#         elif item_t == Item.Domain:
+#           domains.append(resp)
+
+#   except KeyError:
+#     pass
+  
+#   return [urls, domains]
 
 
 def vt_url_args(args, urls: list):
@@ -313,7 +327,6 @@ def vt_url_args(args, urls: list):
   vt.init()
 
   if vt.disabled == False:
-    responses = []
     links = []
 
     h_urls = []
@@ -324,12 +337,16 @@ def vt_url_args(args, urls: list):
       return
 
     if args.scan == True:
+      url_domains = []
+      url_domains.extend(urls["ioc"])
+      url_domains.extend(urls["domain"])
+      
       # Ips are sent to the Virus Total API and each response is stored in a list.
       example_command_1 = "ioc_scanner.py url -i http://yourUrl.com"
       example_command_2 = "ioc_scanner.py url -f pathToYourFile.txt"
       cmd = ""
 
-      links.extend(vt.collect_url_report_links(urls))
+      links.extend(vt.collect_url_report_links(url_domains))
       print(f"{C.f_green('[+]')} Successfully uploaded {C.fd_cyan(str(len(links)))} urls to be scanned Virus Total")
 
       if args.iocs != None:
@@ -345,26 +362,28 @@ def vt_url_args(args, urls: list):
       return
 
     else:
-      responses.extend(vt.collect_url_responses(urls))
-      resp_pair = sort_urls_and_domains(responses, args.debug)
+      h_urls = []
+      h_domains = []
 
-      dbg.dprint(f"Responses: {len(responses)}")
-      dbg.dprint(f"urls: {len(resp_pair[0])}")
-      dbg.dprint(f"domains: {len(resp_pair[1])}")
+      h_urls = vt.collect_url_responses(urls["ioc"])
+      h_domains = vt.collect_url_responses(urls["domain"])
 
-      h_urls = resp_pair[0]
-      h_domains = resp_pair[1]
+      dbg.dprint(f"regex urls: {len(urls['ioc'])}")
+      dbg.dprint(f"regex domains: {len(urls['domain'])}")
+      dbg.dprint(f"urls: {len(h_urls)}")
+      dbg.dprint(f"domains: {len(h_domains)}")
 
 
     if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Url)
+      vt.get_av_detections(h_urls, Item.Url)
+      vt.get_av_detections(h_domains, Item.Url)
 
     # Displays basic threat score if user enablled quick_scan.
     if check_flags(args) < 1:
       if len(h_urls) > 0:
-        VirusTotal.url_get_vtintel_quickscan(h_urls)
+        vt.url_get_vtintel_quickscan(h_urls)
       if len(h_domains) > 0:
-        VirusTotal.domain_get_vtintel_quickscan(h_domains)
+        vt.domain_get_vtintel_quickscan(h_domains)
   else:
     if vt.supress_warnings == False:
       print(vt_disabled_w)
@@ -386,24 +405,84 @@ def vt_ip_args(args, ips: list):
     responses.extend(vt.collect_ip_responses(ips))
     
     if args.av == True:
-      VirusTotal.get_av_detections(responses, Item.Ip)
+      vt.get_av_detections(responses, Item.Ip)
 
     if check_flags(args) < 1:
-      VirusTotal.ip_get_quickscan(responses)
+      vt.ip_get_quickscan(responses)
   else:
     if vt.supress_warnings == False:
       print(vt_disabled_w)
 
 
 def otx_url_args(args, urls: list):
-  pass
+  dbg = Dbg(args.debug)
+  dbg.dprint("Calling otx url/domain")
+
+  otx = AlienVault(args.debug, args.raw_json)
+  otx.init()
+
+  dbg.dprint(f"Otx has been initalized")
+  dbg.dprint(f"OTX disabled: {otx.disabled}")
+  dbg.dprint(f"raw_json: {otx.raw_json}")
+
+  if otx.disabled == False:
+    h_urls = []
+    h_domains = []
+
+    if len(urls) < 1:
+      print(f"{C.f_red('Error')}: No valid urls to scan")
+      return
+    
+    dbg.dprint(f"Sending urls {len(urls['ioc'])} to AlienVault")
+    h_urls.extend(otx.collect_responses(urls['ioc'], IndicatorType.Url))
+
+    dbg.dprint(f"Sending domains {len(urls['domain'])} to AlienVault")
+    h_domains.extend(otx.collect_responses(urls['domain'], IndicatorType.Domain))
+
+    if check_flags(args) < 1:
+
+      if len(h_urls) > 0:
+        otx.get_quickscan(h_urls, IndicatorType.Url)
+      if len(h_domains) > 0:
+        otx.get_quickscan(h_domains, IndicatorType.Domain)
+
+  else:
+    if otx.supress_warnings == False:
+      print(otx_disabled_w)  
 
 
 def otx_hash_args(args, hashes: list):
-  pass
+  dbg = Dbg(args.debug)
+  dbg.dprint("Calling otx hash")
+
+  otx = AlienVault(args.debug, args.raw_json)
+  otx.init()
+
+  dbg.dprint(f"Otx has been initalized")
+  dbg.dprint(f"OTX disabled: {otx.disabled}")
+  dbg.dprint(f"raw_json: {otx.raw_json}")
+
+  if otx.disabled == False:
+    responses = []
+
+    if len(hashes) < 1:
+      print(f"{C.f_red('Error')}: No valid hashes to scan")
+      return
+    
+    dbg.dprint(f"Sending {len(hashes)} to AlienVault")
+    responses.extend(otx.collect_responses(hashes, IndicatorType.Hash))
+
+    if check_flags(args) < 1:
+      otx.get_quickscan(responses, IndicatorType.Hash)    
+
+  else:
+    if otx.supress_warnings == False:
+      print(otx_disabled_w)  
 
 
 def otx_ip_args(args, ips: list):
+  '''Function initalizes AlienVault, sends each IOC to the API and presents the information to the screen.'''
+  
   dbg = Dbg(args.debug)
   dbg.dprint("calling otx ip")
 
@@ -422,17 +501,19 @@ def otx_ip_args(args, ips: list):
       return
     
     dbg.dprint(f"Sending {len(ips)} to AlienVault")
-    responses.extend(otx.collect_ip_responses(ips))
+    responses.extend(otx.collect_responses(ips, IndicatorType.Ipv4))
 
     if check_flags(args) < 1:
-      AlienVault.get_ip_quickscan(responses)    
+      otx.get_quickscan(responses, IndicatorType.Ipv4)    
 
   else:
     if otx.supress_warnings == False:
       print(otx_disabled_w)
 
 
-def query_tfx_ioc(args, iocs: list, qtype=QueryType.Other):
+def query_tfx_ioc(args, iocs: list, qtype=QueryType.Ip):
+  '''Function initalizes ThreatFox, sends each IOC to the API and presents the information to the screen.'''
+  
   dbg = Dbg(args.debug)
   dbg.dprint("Querying ThreatFox for IOCs")
 
@@ -444,22 +525,33 @@ def query_tfx_ioc(args, iocs: list, qtype=QueryType.Other):
   dbg.dprint(f"raw_json: {tfx.raw_json}")
 
   if tfx.disabled == False:
+    ioc_list = []
+    
+    if qtype == QueryType.Url:
+      ioc_list.extend(iocs["ioc"])
+      ioc_list.extend(iocs["domain"])
+
     responses = []
     
     if len(iocs) < 1:
       dbg.dprint(f"{C.f_red('Error')}: No valid IOCs to scan")
       return
     
-    responses.extend(tfx.collect_ioc_responses(iocs))
+    if qtype == QueryType.Url:
+      responses.extend(tfx.collect_ioc_responses(ioc_list, qtype))
+    else:
+      responses.extend(tfx.collect_ioc_responses(iocs, qtype))
     
     dbg.dprint(f"Sending {len(iocs)} to ThreatFox")
-    ThreatFox.get_ioc_quickscan(responses)
+    tfx.get_ioc_quickscan(responses)
   else:
     if tfx.supress_warnings == False:
       print(tfx_disabled_w)
 
 
 def get_feature_status():
+  '''Function reads the config file and displays whether a particular feature is enabled or disabled.'''
+
   pair = load_config()
   data = pair[0]
   

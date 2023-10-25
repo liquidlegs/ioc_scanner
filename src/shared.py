@@ -112,7 +112,11 @@ def extract_date(date: str) -> str:
 def get_items_from_cmd(debug: bool, istring: str, delim: str, cmd_item: Item) -> list[str]:
   '''Splits ip address received from the commandline and returns them as a list.'''
   dbg = Dbg(debug)
-  out = []
+  out = {
+    "ioc": [],
+    "domain": []
+  }
+
   temp_items = istring.split(delim)
   dbg.dprint(f"Attempting to split commandline items {temp_items}")
 
@@ -121,10 +125,10 @@ def get_items_from_cmd(debug: bool, istring: str, delim: str, cmd_item: Item) ->
       result = validate_ip(ip)
       
       if result != None:
-        out.append(result)
+        out["ioc"].append(result)
   
   elif cmd_item == Item.Hash:
-    out.extend(temp_items)
+    out["ioc"].extend(temp_items)
   
   
   elif cmd_item == Item.Url:
@@ -133,12 +137,15 @@ def get_items_from_cmd(debug: bool, istring: str, delim: str, cmd_item: Item) ->
 
       if result == None:
         result = validate_domain(url)
+        out["domain"].append(result)
       
       if result != None:
-        out.append(result)
+        out["ioc"].append(result)
 
 
-  return list(set(out))
+  out["ioc"] = list(set(out["ioc"]))
+  out["domain"] = list(set(out["domain"]))
+  return out
 
 
 def get_items_from_list(content: list[str], file_item: Item) -> list[str]:
@@ -357,6 +364,8 @@ def parse_config_file(data: str) -> str:
 
 
 def get_feature_status(key: str, feature: FeatureList):
+  '''Function reads each key in the config file and will display the value depending on whether it is true or false.'''
+  
   if feature == FeatureList.Vt:
     value = bool(check_json_error(key, VIRUS_TOTAL_DISABLED))
 
@@ -399,6 +408,9 @@ def get_feature_status(key: str, feature: FeatureList):
 
 
 def save_config_file(debug: bool, feature: FeatureList, state: FeatureState):
+  '''Function will modify the boolean values for each feature that has been specified by the user to be enabled or disabled.
+  Once compete, the new data will be written to the file and the changes to the config file will be verified to determine if successful.'''
+  
   dbg = Dbg(debug)
   data_pair = load_config()
   config = data_pair[0]
@@ -474,6 +486,9 @@ def save_config_file(debug: bool, feature: FeatureList, state: FeatureState):
 
 
 def check_json_error(data: str, key: str) -> str:
+  '''Function will attempt to retrieve the data from a json field and key that is specified by the user.
+  This is all to prevent python crashing so that even if a value can't be extracted, information can still be displayed.'''
+  
   try:
     out = data[key]
     return out

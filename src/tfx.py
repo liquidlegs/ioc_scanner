@@ -13,7 +13,8 @@ class TfxApiErr(enum.Enum):
 
 class QueryType(enum.Enum):
   Hash = 0
-  Other = 1
+  Url = 1
+  Ip = 3
 
 
 class ThreatFox(Dbg):
@@ -56,7 +57,8 @@ class ThreatFox(Dbg):
     self.api_key = ["x-apikey", ""]
 
 
-  def query_ioc(self, ioc: str, qtype=QueryType.Other):
+  def query_ioc(self, ioc: str, qtype=QueryType.Ip):
+    '''Function queries the Threat Fox API for IOCs such as Urls, domains, hashes and IP addresses'''
     base_url = self.BASE_PTH_QUERY_IOC
     
     header = {
@@ -86,7 +88,8 @@ class ThreatFox(Dbg):
     return text
 
 
-  def collect_ioc_responses(self, iocs: list, qtype=QueryType.Other):
+  def collect_ioc_responses(self, iocs: list, qtype=QueryType.Ip):
+    '''Function reads a list of IOCs and then queries each of them on the ThreatFox API and collects the json response to each.'''
     responses = []
     err = TfxApiErr.Nan
     
@@ -103,6 +106,7 @@ class ThreatFox(Dbg):
 
 
   def get_error_code(err: str):
+    '''Function checks the message received from the API response and returns the corresponding TfxApiErr enum.'''
     if err == "ok":
       return TfxApiErr.Ok
     elif err == "no_result":
@@ -114,6 +118,8 @@ class ThreatFox(Dbg):
 
 
   def handle_api_error(self, data):
+    '''Function checks each json response and returns the corresponding TfxApiErr anum as a result.
+    As most IOCs from the ThreatFox API will not return a result, most error messages will not be displayed.'''
     err = TfxApiErr.Nan
 
     if self.raw_json == True:
@@ -138,6 +144,7 @@ class ThreatFox(Dbg):
 
 
   def get_tag_contents(tags: list):
+    '''Function gets the contents of the tags json key and retrieves the string stored in the array.'''
     out = ""
 
     try:
@@ -156,7 +163,9 @@ class ThreatFox(Dbg):
     return out
 
 
-  def get_ioc_quickscan(iocs: list):
+  def get_ioc_quickscan(self, iocs: list):
+    '''Function takes a list of the IOCs as json responses and displays the information in a nice table.'''
+
     table = ColorTable()
     table.align = "l"
     table.field_names = [
@@ -172,7 +181,7 @@ class ThreatFox(Dbg):
     ]
 
     table._max_width = {
-      C.f_yellow("ioc"): 80,
+      C.f_yellow("ioc"): 60,
       C.f_yellow("type"): 10,
       C.f_yellow("threat"): 20,
       C.f_yellow("malware"): 25,

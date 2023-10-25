@@ -1,11 +1,16 @@
 from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, ALIEN_VAULT_DISABLED, SUPRESS_WARNINGS
 from src.shared import Colour as C, Item, Dbg, check_json_error
 import requests
-import enum, json
+import enum, json, re
 from prettytable.colortable import ColorTable
+from json.decoder import JSONDecodeError
+from requests.exceptions import ReadTimeout
 
 # useful documentation for OTX headers
-# https://gist.github.com/chrisdoman/3cccfbf6f07cf007271bec583305eb92
+# https://gist.github.com/chrisdoman/
+
+ALIEN_VAULT_MAX_TAGS = 80
+ALIEN_VAULT_MAX_FAM = 5
 
 class Indicator(enum.Enum):
   general = 0
@@ -18,6 +23,14 @@ class Indicator(enum.Enum):
   nids_list = 7
   whois = 8
   analysis = 9
+
+
+class IndicatorType(enum.Enum):
+  Ipv4 = 0
+  Ipv6 = 1
+  Url = 2
+  Domain = 3
+  Hash = 4
 
 
 class OtxApiErr(enum.Enum):
@@ -82,29 +95,24 @@ class AlienVault(Dbg):
     self.api_key = ["X-OTX-API-KEY", ""]
 
 
-  def handle_otx_error(self, data: str, indicator: Indicator) -> OtxApiErr:
+  def handle_otx_error(self, data: str) -> OtxApiErr:
     err = OtxApiErr.Nan
     
     if self.raw_json == True:
       print(data)
       exit(1)
 
-    # try:
-    #   temp_err = OtxApiErr.Nan
-    #   dt = json.loads(data)
+    try:
+      dt = json.loads(data)
+      ind = dt["indicator"]
 
-    #   if indicator == Indicator.analysis:
-    #     msg = re_contains(r"(not\s+found|notfound)", dt["detail"])
-
-    #     if msg == "not found" or msg == "notfound":
-    #       err = OtxApiErr.NotFound
-    #       print(f"{C.f_red('Error')}: ({C.f_magenta('AlienVault')}) {C.fd_yellow(msg)}")
-
-    #   return err
-    # except KeyError:
-    #   return err
-
-    pass
+      return err
+    except TypeError:
+      return OtxApiErr.NotFound
+    except KeyError:
+      return OtxApiErr.NotFound
+    except JSONDecodeError:
+      return OtxApiErr.Null
 
 
   def get_ip_indicators(self, ip_type: Ip, data: str, ind: Indicator):
@@ -113,7 +121,7 @@ class AlienVault(Dbg):
     if ip_type == Ip.V4:
       base_url = self.IND_IPv4.replace("{ip}", data)
     elif ip_type == Ip.V6:
-      base_url = self.IND_IPv4.replace("{ip}", data)
+      base_url = self.IND_IPv6.replace("{ip}", data)
 
     if ind == Indicator.general:
       base_url = base_url.replace("{section}", "general")
@@ -132,63 +140,379 @@ class AlienVault(Dbg):
     elif ind == Indicator.nids_list:
       base_url = base_url.replace("{section}", "nids_list")
 
-    req = requests.get(base_url, headers={
-      self.JSON_HDR[0]: self.JSON_HDR[1],
-      self.api_key[0]: self.api_key[1]
-    })
+    try:
+      req = requests.get(base_url, timeout=3, headers={
+        self.JSON_HDR[0]: self.JSON_HDR[1],
+        self.api_key[0]: self.api_key[1]
+      })
+    except ReadTimeout:
+      return "None"
 
     text = req.text
     return text
 
 
-  def collect_ip_responses(self, ips: list) -> list:
+  def get_indicator(self, id_type: IndicatorType, data: str):
+    base_url = ""
+
+    if id_type == IndicatorType.Ipv4:
+      base_url = self.IND_IPv4.replace("{ip}", data)
+    elif id_type == IndicatorType.Ipv6:
+      base_url = self.IND_IPv6.replace("{ip}", data)
+    elif id_type == IndicatorType.Url:
+      base_url = self.IND_URL.replace("{url}", data)
+    elif id_type == IndicatorType.Domain:
+      base_url = self.IND_DOMAIN.replace("{domain}", data)
+    elif id_type == IndicatorType.Hash:
+      base_url = self.IND_FILEHASH.replace("{file_hash}", data)
+
+    if base_url != "":
+      base_url = base_url.replace("{section}", "general")
+
+    try:
+      req = requests.get(base_url, timeout=3, headers={
+        self.JSON_HDR[0]: self.JSON_HDR[1],
+        self.api_key[0]: self.api_key[1]
+      })
+    except ReadTimeout:
+      return "None"
+
+    text = req.text
+    return text
+
+
+  def collect_responses(self, inds: list, id_type: IndicatorType) -> list:
     out = []
 
-    for address in ips:
-      pulses = self.get_ip_indicators(Ip.V4, address, Indicator.reputation)
-      # http_scans = self.get_ip_indicators(Ip.V4, address, Indicator.http_scans)
-      # passive_dns = self.get_ip_indicators(Ip.V4, address, Indicator.passive_dns)
-      # malware_s = self.get_ip_indicators(Ip.V4, address, Indicator.malware)      
+    for address in inds:
+      general = self.get_indicator(id_type, address)
 
-      # out.append([pulses, http_scans, passive_dns, malware_s])
-      data = json.loads(pulses)
-      self.handle_otx_error(json.dumps(data, indent=2), Indicator.general)
-      out.append(data)
+      self.dprint(f"Checking {address}")
+      err = self.handle_otx_error(general)
+
+      if err == OtxApiErr.Nan:
+        data = json.loads(general)
+        out.append(data)
 
     return out
 
 
-  def get_ip_quickscan(ips: list):
-    print(f"Scanning {len(ips)} valid ips")
+  def get_highlighted_text(text: str) -> str:
+    try:
+      out = re.search(
+        r"(malware|ransom|botnet|wannacry|malicious|webscanner|scanner|trojan|apt|worm|spam|phishing|exe|dll|emotet|mirai|dridex|redlinestealer|agenttesla|smoke|amadey|formbook|stealc|lummastealer)",
+      text, re.IGNORECASE).group(0)
 
+      return C.bd_red(C.f_white(out))
+    except AttributeError:
+      return text
+
+
+  def get_pulse_tags(info: str):
+    pulses = check_json_error(info, "pulses")
+    tags = []
+
+    if pulses != None and pulses != "":
+      for i in pulses:
+        temp_tags = check_json_error(i, "tags")
+
+        if len(temp_tags) > 0:
+          tags.extend(temp_tags)
+
+    dedup_tags = list(set(tags))
+    return dedup_tags
+
+
+  def get_pulse_information(pulses: str) -> str:
+    output = {
+      "families": "",
+      "tags": ""
+    }
+
+    temp_fam = []
+    temp_tags = []
+    s_fam = ""
+    s_tags = ""
+
+    for i in pulses:
+      families = check_json_error(i, "malware_families")
+      tags = check_json_error(i, "tags")
+
+      if families != None and families != "":
+        temp_fam.append(families)
+
+      if tags != None and tags != "":
+        temp_tags.append(tags)
+
+
+    fam_counter = 0
+    for i in temp_fam:
+
+      for idx in range(len(i)):
+        if fam_counter > ALIEN_VAULT_MAX_FAM:
+          break
+
+        name = check_json_error(i[idx], "display_name")
+        
+        if idx == len(i)-1:
+          s_fam += name
+        else:
+          s_fam += name + ","
+
+        fam_counter += 1
+    
+
+    tag_counter = 0
+    for i in temp_tags:
+
+      for idx in range(len(i)):
+        
+        if tag_counter > ALIEN_VAULT_MAX_TAGS:
+          break
+
+        if idx == len(i)-1:
+          s_tags += AlienVault.get_highlighted_text(i[idx])
+        else:
+          s_tags += AlienVault.get_highlighted_text(i[idx]) + ","
+
+        tag_counter += 1
+
+    
+    if s_fam != "":
+      output["families"] = s_fam
+
+    if s_tags != "":
+      output["tags"] = s_tags
+
+    return output
+
+
+  def get_quickscan(self, iocs: list, ind: IndicatorType):
     table = ColorTable()
     table.align = "l"
-    table.field_names = [
+    rows = 0
 
-    ]
+    if ind == IndicatorType.Ipv4 or ind == IndicatorType.Ipv6:
+      self.dprint(f"Scanning {len(iocs)} valid ips")
 
-    pass
+      table.field_names = [
+        C.f_yellow("IP"),
+        C.f_yellow("Validation"),
+        C.f_yellow("ASN"),
+        C.f_yellow("Code"),
+        C.f_yellow("Pulses"),
+        C.f_yellow("Rep"),
+        C.f_yellow("Tags")
+      ]
+
+      table._max_width = {
+        C.f_yellow("IP"): 40,
+        C.f_yellow("Validation"): 25,
+        C.f_yellow("ASN"): 30,
+        C.f_yellow("Code"): 8,
+        C.f_yellow("Pulses"): 8,
+        C.f_yellow("Rep"): 8,
+        C.f_yellow("Tags"): 100
+      }
+
+      for i in iocs:
+        rep = check_json_error(i, "reputation")
+        ip = C.f_green(check_json_error(i, "indicator"))
+        validation = ""
+        s_tags = ""
+        pulse_count = 0
+        
+        tags = []
+
+        for idx in i["validation"]:
+          temp_validation = check_json_error(idx, "name")
+          
+          if temp_validation != None and temp_validation != "":
+            validation = temp_validation
+
+        asn = check_json_error(i, "asn")
+        code = check_json_error(i, "country_code")
+
+        pulse_info = check_json_error(i, "pulse_info")
+        
+        if pulse_info != None and pulse_info != "":
+          pulse_count = check_json_error(pulse_info, "count")
+          tags = AlienVault.get_pulse_tags(pulse_info)
+
+          temp_tags = tags.sort(reverse=True)
+          if temp_tags != None:
+            tags = temp_tags
+
+        for tg in range(len(tags)):
+          if tg > ALIEN_VAULT_MAX_TAGS:
+            break
+          
+          if tg == len(tags)-1:
+            s_tags += AlienVault.get_highlighted_text(tags[tg])
+          else:
+            s_tags += AlienVault.get_highlighted_text(tags[tg]) + ","
 
 
-  def get_domain_indictors():
-    pass
+        table.add_row([ip, validation, asn, code, pulse_count, rep, s_tags])
+        rows += 1
+
+    else:
+      ind_name = ""
+      ind_name_size = 75
+
+      if ind == IndicatorType.Url:
+        ind_name = "Url"
+      elif ind == IndicatorType.Domain:
+        ind_name = "Domain"
+      elif ind == IndicatorType.Hash:
+        ind_name = "SHA256"
+        ind_name_size = 64
+
+      table.field_names = [
+        C.f_yellow(ind_name),
+        C.f_yellow("Pulses"),
+        C.f_yellow("Families"),
+        C.f_yellow("tags")
+      ]
+
+      table._max_width = {
+        C.f_yellow(ind_name): ind_name_size,
+        C.f_yellow("Pulses"): 3,
+        C.f_yellow("Families"): 25,
+        C.f_yellow("tags"): 100
+      }
+
+      rows = 0
+      for key in iocs:
+        hash = C.f_green(check_json_error(key, "indicator"))
+        pulse_info = check_json_error(key, "pulse_info")
+
+        pulses = check_json_error(pulse_info, "pulses")
+        pulse_count = C.fd_yellow(check_json_error(pulse_info, "count"))
+        
+        info = AlienVault.get_pulse_information(pulses)
+        families = C.bd_red(C.f_white(info["families"]))
+        tags = info["tags"]
+
+        table.add_row([hash, pulse_count, families, tags])
+        rows += 1      
+
+    if rows > 0:
+      print("\nAlienVault Results")
+      print(table)
+    else:
+      print("Nothing to display")
 
 
-  def get_hostname_indictators():
-    pass
+  # def get_url_quickscan(self, urls):
+  #   table = ColorTable()
+  #   table.align = "l"
+  #   table.field_names = [
+  #     C.f_yellow("Hash"),
+  #     C.f_yellow("Pulses"),
+  #     C.f_yellow("Families"),
+  #     C.f_yellow("tags")
+  #   ]
+
+  #   table._max_width = {
+  #     C.f_yellow("Hash"): 64,
+  #     C.f_yellow("Pulses"): 3,
+  #     C.f_yellow("Families"): 25,
+  #     C.f_yellow("tags"): 100
+  #   }
+
+  #   rows = 0
+  #   for key in urls:
+  #     hash = C.f_green(check_json_error(key, "indicator"))
+  #     pulse_info = check_json_error(key, "pulse_info")
+
+  #     pulses = check_json_error(pulse_info, "pulses")
+  #     pulse_count = C.fd_yellow(check_json_error(pulse_info, "count"))
+      
+  #     info = AlienVault.get_pulse_information(pulses)
+  #     families = C.bd_red(C.f_white(info["families"]))
+  #     tags = info["tags"]
+
+  #     table.add_row([hash, pulse_count, families, tags])
+  #     rows += 1
+    
+  #   if rows > 0:
+  #     print(table)
+  #   else:
+  #     print("Nothing to display")
 
 
-  def get_filehash_indicators():
-    pass
+  # def get_domain_quickscan(self, domains):
+  #   table = ColorTable()
+  #   table.align = "l"
+  #   table.field_names = [
+  #     C.f_yellow("Hash"),
+  #     C.f_yellow("Pulses"),
+  #     C.f_yellow("Families"),
+  #     C.f_yellow("tags")
+  #   ]
+
+  #   table._max_width = {
+  #     C.f_yellow("Hash"): 64,
+  #     C.f_yellow("Pulses"): 3,
+  #     C.f_yellow("Families"): 25,
+  #     C.f_yellow("tags"): 100
+  #   }
+
+  #   rows = 0
+  #   for key in domains:
+  #     hash = C.f_green(check_json_error(key, "indicator"))
+  #     pulse_info = check_json_error(key, "pulse_info")
+
+  #     pulses = check_json_error(pulse_info, "pulses")
+  #     pulse_count = C.fd_yellow(check_json_error(pulse_info, "count"))
+      
+  #     info = AlienVault.get_pulse_information(pulses)
+  #     families = C.bd_red(C.f_white(info["families"]))
+  #     tags = info["tags"]
+
+  #     table.add_row([hash, pulse_count, families, tags])
+  #     rows += 1
+    
+  #   if rows > 0:
+  #     print(table)
+  #   else:
+  #     print("Nothing to display")
 
 
-  def get_url_indicators():
-    pass
+  # def get_hash_quickscan(self, hashes: list):
+  #   table = ColorTable()
+  #   table.align = "l"
+  #   table.field_names = [
+  #     C.f_yellow("Hash"),
+  #     C.f_yellow("Pulses"),
+  #     C.f_yellow("Families"),
+  #     C.f_yellow("tags")
+  #   ]
 
+  #   table._max_width = {
+  #     C.f_yellow("Hash"): 64,
+  #     C.f_yellow("Pulses"): 3,
+  #     C.f_yellow("Families"): 25,
+  #     C.f_yellow("tags"): 100
+  #   }
 
-  def get_nid_indicators():
-    pass
+  #   rows = 0
+  #   for key in hashes:
+  #     hash = C.f_green(check_json_error(key, "indicator"))
+  #     pulse_info = check_json_error(key, "pulse_info")
 
+  #     pulses = check_json_error(pulse_info, "pulses")
+  #     pulse_count = C.fd_yellow(check_json_error(pulse_info, "count"))
+      
+  #     info = AlienVault.get_pulse_information(pulses)
+  #     families = C.bd_red(C.f_white(info["families"]))
+  #     tags = info["tags"]
 
-  def get_correlation_indicators():
-    pass
+  #     table.add_row([hash, pulse_count, families, tags])
+  #     rows += 1
+    
+  #   if rows > 0:
+  #     print(table)
+  #   else:
+  #     print("Nothing to display")

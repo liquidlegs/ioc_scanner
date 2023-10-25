@@ -299,10 +299,9 @@ class VirusTotal(Dbg):
     return responses
 
 
-  @staticmethod
-  def ip_get_quickscan(ips: list):
+  def ip_get_quickscan(self, ips: list):
     '''Displays basic information and threat scores of each specified IP address to the screen.'''
-    print(f"Starting quickscan with {len(ips)} valid IPs")
+    self.dprint(f"Starting quickscan with {len(ips)} valid IPs")
     
     table = ColorTable()
     table.align = "l"
@@ -373,9 +372,9 @@ class VirusTotal(Dbg):
     return out
 
 
-  def url_get_vtintel_quickscan(urls: list):
+  def url_get_vtintel_quickscan(self, urls: list):
     '''Displays basic information and threat scores of each specified URL to the screen.'''
-    print(f"Starting scan with {len(urls)} valid urls")
+    self.dprint(f"Starting scan with {len(urls)} valid urls")
 
     table = ColorTable()
     table.align = "l"
@@ -474,7 +473,7 @@ class VirusTotal(Dbg):
         continue
 
     if rows > 0:
-      print("Virus Total Results")
+      print("\nVirus Total Results")
       print(table)
     else:
       print("Nothing to display")
@@ -495,9 +494,9 @@ class VirusTotal(Dbg):
     return out
 
 
-  def domain_get_vtintel_quickscan(domains: list):
+  def domain_get_vtintel_quickscan(self, domains: list):
     '''Displays basic information and threat scores of each specified Domain to the screen.'''
-    print(f"Starting scan with {len(domains)} valid domains")
+    self.dprint(f"Starting scan with {len(domains)} valid domains")
 
     table = ColorTable()
     table.align = "l"
@@ -599,16 +598,15 @@ class VirusTotal(Dbg):
         continue
 
     if rows > 0:
-      print("Virus Total Results")
+      print("\nVirus Total Results")
       print(table)
     else:
       print("Nothing to display")
 
 
-  @staticmethod
-  def url_get_quickscan(urls: list):
+  def url_get_quickscan(self, urls: list):
     '''Displays basic information and threat scores of each specified URL to the screen.'''
-    print(f"Starting scan with {len(urls)} valid urls")
+    self.dprint(f"Starting scan with {len(urls)} valid urls")
 
     table = ColorTable()
     table.align = "l"
@@ -657,7 +655,7 @@ class VirusTotal(Dbg):
         continue
 
     if rows > 0:
-      print("Virus Total Results")
+      print("\nVirus Total Results")
       print(table)
     else:
       print("Nothing to display")
@@ -672,10 +670,9 @@ class VirusTotal(Dbg):
     return out    
 
 
-  @staticmethod
-  def file_get_quickscan(hashes: str) -> str:
+  def file_get_quickscan(self, hashes: str) -> str:
     '''Displays basic information and threat scores of each specified file hash to the screen.'''
-    print(f"Starting scan with {len(hashes)} valid file hashes")
+    self.dprint(f"Starting scan with {len(hashes)} valid file hashes")
 
     table = ColorTable()
     table.align = "l"
@@ -745,15 +742,14 @@ class VirusTotal(Dbg):
         continue
 
     if rows > 0:
-      print("Virus Total Results")
+      print("\nVirus Total Results")
       print(table)
     else:
       print("Nothing to display")
 
   
-  @staticmethod
-  def get_av_detections(data: list, item: Item):
-    print(f"Sending {len(data)} items to the VT API backend")
+  def get_av_detections(self, data: list, item: Item):
+    self.dprint(f"Sending {len(data)} items to the VT API backend")
     
     table_store = []
 
