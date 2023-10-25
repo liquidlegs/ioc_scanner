@@ -9,7 +9,7 @@ from requests.exceptions import ReadTimeout
 # useful documentation for OTX headers
 # https://gist.github.com/chrisdoman/
 
-ALIEN_VAULT_MAX_TAGS = 80
+ALIEN_VAULT_MAX_TAGS = 40
 ALIEN_VAULT_MAX_FAM = 5
 
 class Indicator(enum.Enum):

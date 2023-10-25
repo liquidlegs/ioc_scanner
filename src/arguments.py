@@ -42,11 +42,6 @@ def toggle_features(args):
     feature = FeatureList.Otx
     state = FeatureState.Toggle
   
-  elif key == "md":
-    dbg.dprint("toggle MetaDefender")
-    feature = FeatureList.Md
-    state = FeatureState.Toggle
-  
   elif key == "tfx":
     dbg.dprint("toggle Threat Fox")
     feature = FeatureList.Tfx
@@ -85,18 +80,6 @@ def test_connection(args):
 
     if err == VtApiErr.Nan:
       print(f"{C.f_green('[+]')} Virus Total is correctly configured")
-
-  otx = AlienVault()
-  otx.init()
-  
-  if otx.disabled == False:
-    print(f"{C.f_red('[-]')} AlientVault is not yet implemented")
-    otx_response = otx.get_ip_indicators(Ip.V4, "169.239.129.108", Indicator.general)
-    otx_json = json.loads(otx_response)
-    out = json.dumps(otx_json, indent=2)
-    
-    if args.otx_debug == True:
-      print(out)
 
 
 def get_arg_items(args, item: Item):
@@ -166,7 +149,7 @@ def ioc_args(command: Item, args):
     
     if items != None:
       vt_ip_args(args, items["ioc"])
-      md_ip_args(args, items["ioc"])
+      # md_ip_args(args, items["ioc"])
       otx_ip_args(args, items["ioc"])
       query_tfx_ioc(args, items["ioc"])
   
@@ -176,7 +159,7 @@ def ioc_args(command: Item, args):
     
     if items != None:
       vt_url_args(args, items)
-      md_url_args(args, items)
+      # md_url_args(args, items)
       otx_url_args(args, items)
       query_tfx_ioc(args, items, QueryType.Url)
   
@@ -186,68 +169,68 @@ def ioc_args(command: Item, args):
     
     if items != None:
       vt_hash_args(args, items["ioc"])
-      md_hash_args(args, items["ioc"])
+      # md_hash_args(args, items["ioc"])
       otx_hash_args(args, items["ioc"])
       query_tfx_ioc(args, items["ioc"], QueryType.Hash)
 
 
-def md_ip_args(args, ips: list):
-  md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
-  md.init()
+# def md_ip_args(args, ips: list):
+#   md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
+#   md.init()
 
-  output = ""
+#   output = ""
 
-  if md.disabled == False:
-    if len(ips) == 1:
-      output = md.get_ip_rep(ips[0])
-    elif len(ips) > 1:
-      output = md.get_ip_rep_bulk(ips)
+#   if md.disabled == False:
+#     if len(ips) == 1:
+#       output = md.get_ip_rep(ips[0])
+#     elif len(ips) > 1:
+#       output = md.get_ip_rep_bulk(ips)
 
-    if args.raw_json == True:
-      print(output[0])
+#     if args.raw_json == True:
+#       print(output[0])
 
-    err = md.handle_api_error(output[0])
-    if err == MdfApiErr.Nan:
-      MetaDefenderCloud.get_quickscan_ip(output[0], output[1])
-  else:
-    if md.supress_warnings == False:
-      print(metadef_disabled_w)
-
-
-def md_hash_args(args, hashes: list):
-  md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
-  md.init()
-
-  output = ""
-
-  if md.disabled == False:
-    if len(hashes) == 1:
-      output = md.get_hash_rep(hashes[0])
-    elif len(hashes) > 1:
-      output = md.get_hash_rep_bulk(hashes)
-
-    MetaDefenderCloud.get_quickscan_hash(output[0], output[1])
-  else:
-    if md.supress_warnings == False:
-      print(metadef_disabled_w)
+#     err = md.handle_api_error(output[0])
+#     if err == MdfApiErr.Nan:
+#       MetaDefenderCloud.get_quickscan_ip(output[0], output[1])
+#   else:
+#     if md.supress_warnings == False:
+#       print(metadef_disabled_w)
 
 
-def md_url_args(args, urls: list):
-  md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
-  md.init()
+# def md_hash_args(args, hashes: list):
+#   md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
+#   md.init()
 
-  output = ""
+#   output = ""
 
-  if md.disabled == False:
-    if len(urls) == 1:
-      output = md.get_url_rep(urls[0], ItemType.URL)
-    elif len(urls) > 1:
-      output = md.get_url_rep_bulk(urls, ItemType.URL)
+#   if md.disabled == False:
+#     if len(hashes) == 1:
+#       output = md.get_hash_rep(hashes[0])
+#     elif len(hashes) > 1:
+#       output = md.get_hash_rep_bulk(hashes)
 
-    print(output[0])
-  else:
-    if md.supress_warnings == False:
-      print(metadef_disabled_w)
+#     MetaDefenderCloud.get_quickscan_hash(output[0], output[1])
+#   else:
+#     if md.supress_warnings == False:
+#       print(metadef_disabled_w)
+
+
+# def md_url_args(args, urls: list):
+#   md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
+#   md.init()
+
+#   output = ""
+
+#   if md.disabled == False:
+#     if len(urls) == 1:
+#       output = md.get_url_rep(urls[0], ItemType.URL)
+#     elif len(urls) > 1:
+#       output = md.get_url_rep_bulk(urls, ItemType.URL)
+
+#     print(output[0])
+#   else:
+#     if md.supress_warnings == False:
+#       print(metadef_disabled_w)
 
 
 def vt_hash_args(args, file_hashes: list):
@@ -563,7 +546,6 @@ def get_feature_status():
   ]
 
   vt = bool(check_json_error(data, "disable_vt"))
-  md = bool(check_json_error(data, "disable_md"))
   tf = bool(check_json_error(data, "disable_tfx"))
   otx = bool(check_json_error(data, "disable_otx"))
   warnings = bool(check_json_error(data, "supress_warnings"))
@@ -572,11 +554,6 @@ def get_feature_status():
     vt = C.f_red("False")
   else:
     vt = C.f_green("True")
-
-  if md == True:
-    md = C.f_red("False")
-  else:
-    md = C.f_green("True")
 
   if tf == True:
     tf = C.f_red("False")
@@ -596,7 +573,6 @@ def get_feature_status():
   table.add_rows(
     [[C.f_blue("Virus Total"), vt],
     [C.f_green("Threat Fox"), tf],
-    [C.f_magenta("MetaDefender"), md],
     [C.f_red("Alien Vault"), otx],
     [C.fd_yellow("Suppress Warnings"), warnings]]
   )

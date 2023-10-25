@@ -433,14 +433,6 @@ def save_config_file(debug: bool, feature: FeatureList, state: FeatureState):
       elif value == False:
         config[ALIEN_VAULT_DISABLED] = True
 
-    if feature == FeatureList.Md:
-      
-      value = bool(check_json_error(config, METADF_DISABLED))
-      if value == True:
-        config[METADF_DISABLED] = False
-      elif value == False:
-        config[METADF_DISABLED] = True
-
     if feature == FeatureList.Tfx:
       
       value = bool(check_json_error(config, THREAT_FOX_DISABLED))
@@ -460,14 +452,12 @@ def save_config_file(debug: bool, feature: FeatureList, state: FeatureState):
   elif state == FeatureState.Enabled:
     config[VIRUS_TOTAL_DISABLED] = False
     config[ALIEN_VAULT_DISABLED] = False
-    config[METADF_DISABLED] = False
     config[THREAT_FOX_DISABLED] = False
     config[SUPRESS_WARNINGS] = False
 
   elif state == FeatureState.Disabled:
     config[VIRUS_TOTAL_DISABLED] = True
     config[ALIEN_VAULT_DISABLED] = True
-    config[METADF_DISABLED] = True
     config[THREAT_FOX_DISABLED] = True
     config[SUPRESS_WARNINGS] = True
 
