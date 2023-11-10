@@ -524,9 +524,10 @@ def query_tfx_ioc(args, iocs: list, qtype=QueryType.Ip):
       responses.extend(tfx.collect_ioc_responses(ioc_list, qtype))
     else:
       responses.extend(tfx.collect_ioc_responses(iocs, qtype))
-    
-    dbg.dprint(f"Sending {len(iocs)} to ThreatFox")
-    tfx.get_ioc_quickscan(responses)
+
+    if len(responses) > 0:
+      dbg.dprint(f"Sending {len(iocs)} to ThreatFox")
+      tfx.get_ioc_quickscan(responses)    
   else:
     if tfx.supress_warnings == False:
       print(tfx_disabled_w)

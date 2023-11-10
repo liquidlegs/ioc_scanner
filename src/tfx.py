@@ -9,6 +9,7 @@ class TfxApiErr(enum.Enum):
   Ok = 1
   No_Result = 2
   No_Json = 3
+  Illegal_Hash = 4
 
 
 class QueryType(enum.Enum):
@@ -113,6 +114,8 @@ class ThreatFox(Dbg):
       return TfxApiErr.No_Result
     elif err == "no_json":
       return TfxApiErr.No_Json
+    elif err == "illegl_hash":
+      return TfxApiErr.Illegal_Hash
     else:
       return TfxApiErr.Nan
 

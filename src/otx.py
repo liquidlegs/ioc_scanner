@@ -54,6 +54,7 @@ class AlienVault(Dbg):
   IND_HOSTNAME = "https://otx.alienvault.com/api/v1/indicators/hostname/{hostname}/{section}"
   IND_FILEHASH = "https://otx.alienvault.com/api/v1/indicators/file/{file_hash}/{section}"
   IND_URL = "https://otx.alienvault.com/api/v1/indicators/url/{url}/{section}"
+  IND_SURL = "https://otx.alienvault.com/api/v1/indicators/submit_url"
   IND_NIDS = "https://otx.alienvault.com/api/v1/indicators/nids/{nids}/{section}"
   IND_CORRELATION = "https://otx.alienvault.com/api/v1/indicators/correlation-rule/{correlationrule}/{section}"
 
