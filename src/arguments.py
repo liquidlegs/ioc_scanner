@@ -1,11 +1,9 @@
 from src.vt import VirusTotal, VtApiErr
 from src.otx import AlienVault, Ip, Indicator, IndicatorType
-from src.md import MetaDefenderCloud, ItemType, MdfApiErr
 from src.tfx import ThreatFox, QueryType
 from prettytable.colortable import ColorTable
 from src.shared import Colour as C, get_file_contents, get_items_from_list, Dbg, FeatureList, FeatureState, save_config_file, load_config, check_json_error
 from src.shared import validate_ip, validate_url, is_arg_list, D_LIST, D_CRLF, D_LF, Item, get_items_from_cmd, validate_domain, validate_hash
-import json
 
 metadef_disabled_w = f"{C.f_yellow('Warning')}: MetaDefenderCloud is disabled... Skipping"
 vt_disabled_w = f"{C.f_yellow('Warning')}: Virus Total has been disabled... Skipping."
@@ -149,7 +147,6 @@ def ioc_args(command: Item, args):
     
     if items != None:
       vt_ip_args(args, items["ioc"])
-      # md_ip_args(args, items["ioc"])
       otx_ip_args(args, items["ioc"])
       query_tfx_ioc(args, items["ioc"])
   
@@ -159,7 +156,6 @@ def ioc_args(command: Item, args):
     
     if items != None:
       vt_url_args(args, items)
-      # md_url_args(args, items)
       otx_url_args(args, items)
       query_tfx_ioc(args, items, QueryType.Url)
   
@@ -169,68 +165,8 @@ def ioc_args(command: Item, args):
     
     if items != None:
       vt_hash_args(args, items["ioc"])
-      # md_hash_args(args, items["ioc"])
       otx_hash_args(args, items["ioc"])
       query_tfx_ioc(args, items["ioc"], QueryType.Hash)
-
-
-# def md_ip_args(args, ips: list):
-#   md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
-#   md.init()
-
-#   output = ""
-
-#   if md.disabled == False:
-#     if len(ips) == 1:
-#       output = md.get_ip_rep(ips[0])
-#     elif len(ips) > 1:
-#       output = md.get_ip_rep_bulk(ips)
-
-#     if args.raw_json == True:
-#       print(output[0])
-
-#     err = md.handle_api_error(output[0])
-#     if err == MdfApiErr.Nan:
-#       MetaDefenderCloud.get_quickscan_ip(output[0], output[1])
-#   else:
-#     if md.supress_warnings == False:
-#       print(metadef_disabled_w)
-
-
-# def md_hash_args(args, hashes: list):
-#   md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
-#   md.init()
-
-#   output = ""
-
-#   if md.disabled == False:
-#     if len(hashes) == 1:
-#       output = md.get_hash_rep(hashes[0])
-#     elif len(hashes) > 1:
-#       output = md.get_hash_rep_bulk(hashes)
-
-#     MetaDefenderCloud.get_quickscan_hash(output[0], output[1])
-#   else:
-#     if md.supress_warnings == False:
-#       print(metadef_disabled_w)
-
-
-# def md_url_args(args, urls: list):
-#   md = MetaDefenderCloud(debug=args.debug, raw_json=args.raw_json)
-#   md.init()
-
-#   output = ""
-
-#   if md.disabled == False:
-#     if len(urls) == 1:
-#       output = md.get_url_rep(urls[0], ItemType.URL)
-#     elif len(urls) > 1:
-#       output = md.get_url_rep_bulk(urls, ItemType.URL)
-
-#     print(output[0])
-#   else:
-#     if md.supress_warnings == False:
-#       print(metadef_disabled_w)
 
 
 def vt_hash_args(args, file_hashes: list):
@@ -496,7 +432,7 @@ def otx_ip_args(args, ips: list):
 
 def query_tfx_ioc(args, iocs: list, qtype=QueryType.Ip):
   '''Function initalizes ThreatFox, sends each IOC to the API and presents the information to the screen.'''
-  
+
   dbg = Dbg(args.debug)
   dbg.dprint("Querying ThreatFox for IOCs")
 

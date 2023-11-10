@@ -41,6 +41,7 @@ class OtxApiErr(enum.Enum):
   SubRequired = 4
 
 
+
 class Ip(enum.Enum):
   V4 = 0
   V6 = 1
@@ -96,6 +97,14 @@ class AlienVault(Dbg):
     self.api_key = ["X-OTX-API-KEY", ""]
 
 
+  def get_error_code(err: str) -> OtxApiErr:
+
+    if err == "endpoint not found":
+      return OtxApiErr.NotFound
+    else:
+      return OtxApiErr.Nan
+
+
   def handle_otx_error(self, data: str) -> OtxApiErr:
     err = OtxApiErr.Nan
     
@@ -105,7 +114,15 @@ class AlienVault(Dbg):
 
     try:
       dt = json.loads(data)
-      ind = dt["indicator"]
+      ind = check_json_error(dt, "indicator")
+
+      if ind == "":
+        ind = check_json_error(dt, "detail")
+        err = AlienVault.get_error_code(ind)
+        
+
+      if err != OtxApiErr.Nan:
+        print(f"{C.f_red('Error')}: ({C.f_cyan('AlienVault')}) {C.fd_yellow(ind)}")
 
       return err
     except TypeError:
