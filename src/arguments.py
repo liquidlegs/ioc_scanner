@@ -66,20 +66,6 @@ def toggle_features(args):
   save_config_file(args.debug, feature, state)
 
 
-def test_connection(args):
-  '''Test communication between each service to determine if configured correctly.'''
-  vt = VirusTotal(raw_json=args.raw_json, debug=args.debug)
-  vt.init()
-  if vt.is_apikey_loaded() == True and vt.disabled == False:
-    print(f"{C.f_green('[+]')} Successfully found the Virus Total API key")
-
-    out = vt.query_ip_attributes("192.168.1.1")
-    err = vt.handle_api_error(out)
-
-    if err == VtApiErr.Nan:
-      print(f"{C.f_green('[+]')} Virus Total is correctly configured")
-
-
 def get_arg_items(args, item: Item):
   dbg = Dbg(args.debug)
   output = {
@@ -178,7 +164,7 @@ def vt_hash_args(args, file_hashes: list):
     responses = []
     
     if len(file_hashes) < 1:
-        print(f"{C.f_red('Error')}: No valid hashes to scan")
+        Dbg.eprint("No valid hashes to scan", FeatureList.Vt)
         return
 
     # Hashes are sent to the Virus Total API and each response is stored in a list.
@@ -252,7 +238,7 @@ def vt_url_args(args, urls: list):
     h_domains = []
     
     if len(urls) < 1:
-      print(f"{C.f_red('Error')}: No valid urls to scan")
+      Dbg.eprint("No valid urls to scan", FeatureList.Vt)
       return
 
     if args.scan == True:
@@ -317,7 +303,7 @@ def vt_ip_args(args, ips: list):
     responses = []
 
     if len(ips) < 1:
-      print(f"{C.f_red('Error')}: No valid ips to scan")
+      Dbg.eprint("No valid ips to scan", FeatureList.Vt)
       return
 
     # Ips are sent to the Virus Total API and each response is stored in a list.
@@ -349,7 +335,7 @@ def otx_url_args(args, urls: list):
     h_domains = []
 
     if len(urls) < 1:
-      print(f"{C.f_red('Error')}: No valid urls to scan")
+      Dbg.eprint("No valid urls to scan", FeatureList.Otx)
       return
     
     dbg.dprint(f"Sending urls {len(urls['ioc'])} to AlienVault")
@@ -385,7 +371,7 @@ def otx_hash_args(args, hashes: list):
     responses = []
 
     if len(hashes) < 1:
-      print(f"{C.f_red('Error')}: No valid hashes to scan")
+      Dbg.eprint("No valid hashes to scan", FeatureList.Otx)
       return
     
     dbg.dprint(f"Sending {len(hashes)} to AlienVault")
@@ -416,7 +402,7 @@ def otx_ip_args(args, ips: list):
     responses = []
 
     if len(ips) < 1:
-      print(f"{C.f_red('Error')}: No valid ips to scan")
+      Dbg.eprint("No valid ips to scan", FeatureList.Otx)
       return
     
     dbg.dprint(f"Sending {len(ips)} to AlienVault")
@@ -453,7 +439,7 @@ def query_tfx_ioc(args, iocs: list, qtype=QueryType.Ip):
     responses = []
     
     if len(iocs) < 1:
-      dbg.dprint(f"{C.f_red('Error')}: No valid IOCs to scan")
+      Dbg.eprint("No valid IOCs to scan", FeatureList.Tfx)
       return
     
     if qtype == QueryType.Url:

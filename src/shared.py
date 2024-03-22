@@ -42,6 +42,16 @@ class Dbg:
   def dprint(self, text: str):
     if self.debug == True:
       print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")
+
+  def eprint(text: str, feature=FeatureList.Nan):
+    if feature == FeatureList.Nan:
+      print(f"{Colour.f_red('Error')}: {text}")
+    elif feature == FeatureList.Vt:
+      print(f"{Colour.f_blue('(VirusTotal)')} {Colour.f_red('Error')}: {text}")
+    elif feature == FeatureList.Otx:
+      print(f"{Colour.f_red('(AlienVault)')} {Colour.f_red('Error')}: {text}")
+    elif feature == FeatureList.Tfx:
+      print(f"{Colour.f_green('(ThreatFox)')} {Colour.f_red('Error')}: {text}")
         
   def _dprint(text: str):
     print(f"{Colour.f_red('Debug')} {Colour.fd_cyan('=>')} {Colour.fd_yellow(text)}")

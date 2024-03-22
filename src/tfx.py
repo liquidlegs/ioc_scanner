@@ -1,5 +1,5 @@
 from src.shared import load_config, parse_config_file, THREAT_FOX_KEY, THREAT_FOX_DISABLED, SUPRESS_WARNINGS
-from src.shared import Colour as C, Item, Dbg, check_json_error, extract_date
+from src.shared import Colour as C, Item, Dbg, FeatureList, check_json_error, extract_date
 import requests, enum, json, time
 from prettytable.colortable import ColorTable
 from datetime import datetime
@@ -103,6 +103,8 @@ class ThreatFox(Dbg):
         self.dprint(f"Adding item with err {err} to response list")
         data = json.loads(resp)
         responses.append(data)
+      else:
+        Dbg.eprint(f"{C.fd_cyan(i)} not found", FeatureList.Tfx)
     
     return responses
 
@@ -140,7 +142,7 @@ class ThreatFox(Dbg):
         err = ThreatFox.get_error_code(error)
         msg = dt["data"]
         if err != TfxApiErr.Ok and err != TfxApiErr.No_Result and err != TfxApiErr.Nan:
-          print(f"{C.f_red('Error')}: ({C.f_green('ThreatFox')}) {C.fd_yellow(msg)}")
+          Dbg.eprint(f"{C.fd_yellow(msg)}", FeatureList.Tfx)
 
         self.dprint(f"({C.f_green('ThreatFox')}) {C.fd_yellow(msg)}")
 
@@ -205,7 +207,7 @@ class ThreatFox(Dbg):
 
     rows = 0
     for i in iocs:
-      data = i["data"]
+      data = check_json_error(i, "data")
 
       for idx in data:
         confidence = 0
@@ -273,7 +275,16 @@ class ThreatFox(Dbg):
       print("\nThreatFox IOC Results")
       print(table)
     else:
-      print("Nothing to display")
+      Dbg.eprint(
+        f"Failed to display results. Use {C.fd_cyan('--debug')} to work out what happened", 
+        FeatureList.Vt
+      )
+
+      self.dprint(f"Valid responses: {iocs}")
+      if len(iocs) > 0:
+        
+        for i in iocs:
+          self.dprint(i)
 
     sample_table = ColorTable()
     sample_table.align = "l"

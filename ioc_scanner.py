@@ -2,12 +2,10 @@
 
 import argparse
 from src.shared import Colour as C
-from src.arguments import ioc_args, test_connection, Item, toggle_features, get_feature_status
+from src.arguments import ioc_args, Item, toggle_features, get_feature_status
 
 def main():
   parser = argparse.ArgumentParser(description="none")
-  parser.add_argument("-t", "--test", action="store_true", help="Test API keys are valid and that we can communicate with outside services")
-  parser.add_argument("-o", "--otx-debug", action="store_true", help="Shows raw json response from AlienVault")
   parser.add_argument("-d", "--debug", action="store_true", help="Enables debug messages to be globally displayed")
   parser.add_argument("-r", "--raw-json", action="store_true", help="View the raw json response from the VT API backend.")
   parser.add_argument("--av", action="store_true", help="View the list of vendors that have flagged an ioc.")
@@ -36,8 +34,6 @@ def main():
     ioc_args(Item.Url, args)
   elif args.command == "ip":
     ioc_args(Item.Ip, args)
-  elif args.test == True:
-    test_connection(args)
   elif args.toggle != None:
     toggle_features(args)
   elif args.feature_status != None:

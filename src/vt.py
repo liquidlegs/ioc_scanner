@@ -1,5 +1,5 @@
 from src.shared import load_config, parse_config_file, VIRUS_TOTAL_KEY, VIRUS_TOTAL_DISABLED, SUPRESS_WARNINGS
-from src.shared import Colour as C, Item, Dbg, check_json_error
+from src.shared import Colour as C, Item, Dbg, FeatureList, check_json_error
 import requests, enum, json, time
 from prettytable.colortable import ColorTable
 from datetime import datetime
@@ -301,6 +301,7 @@ class VirusTotal(Dbg):
 
   def ip_get_quickscan(self, ips: list):
     '''Displays basic information and threat scores of each specified IP address to the screen.'''
+    
     self.dprint(f"Starting quickscan with {len(ips)} valid IPs")
     
     table = ColorTable()
@@ -359,7 +360,16 @@ class VirusTotal(Dbg):
       print("Virus Total Results")
       print(table)
     else:
-      print("Nothing to display")
+      Dbg.eprint(
+        f"Failed to display results. Use {C.fd_cyan('--debug')} to work out what happened", 
+        FeatureList.Vt
+      )
+
+      self.dprint(f"Valid responses: {ips}")
+      if len(ips) > 0:
+        
+        for i in ips:
+          self.dprint(i)
 
 
   def separate_string(input: str) -> str:
@@ -476,7 +486,16 @@ class VirusTotal(Dbg):
       print("\nVirus Total Results")
       print(table)
     else:
-      print("Nothing to display")
+      Dbg.eprint(
+        f"Failed to display results. Use {C.fd_cyan('--debug')} to work out what happened", 
+        FeatureList.Vt
+      )
+
+      self.dprint(f"Valid responses: {urls}")
+      if len(urls) > 0:
+        
+        for i in urls:
+          self.dprint(i)
 
 
   def unload_dns_records(records: str) -> str:
@@ -601,7 +620,16 @@ class VirusTotal(Dbg):
       print("\nVirus Total Results")
       print(table)
     else:
-      print("Nothing to display")
+      Dbg.eprint(
+        f"Failed to display results. Use {C.fd_cyan('--debug')} to work out what happened", 
+        FeatureList.Vt
+      )
+
+      self.dprint(f"Valid responses: {domains}")
+      if len(domains) > 0:
+        
+        for i in domains:
+          self.dprint(i)
 
 
   def url_get_quickscan(self, urls: list):
@@ -658,7 +686,16 @@ class VirusTotal(Dbg):
       print("\nVirus Total Results")
       print(table)
     else:
-      print("Nothing to display")
+      Dbg.eprint(
+        f"Failed to display results. Use {C.fd_cyan('--debug')} to work out what happened", 
+        FeatureList.Vt
+      )
+
+      self.dprint(f"Valid responses: {urls}")
+      if len(urls) > 0:
+        
+        for i in urls:
+          self.dprint(i)
 
 
   def pop_string(string: str) -> str:
@@ -745,7 +782,16 @@ class VirusTotal(Dbg):
       print("\nVirus Total Results")
       print(table)
     else:
-      print("Nothing to display")
+      Dbg.eprint(
+        f"Failed to display results. Use {C.fd_cyan('--debug')} to work out what happened", 
+        FeatureList.Vt
+      )
+
+      self.dprint(f"Valid responses: {hashes}")
+      if len(hashes) > 0:
+        
+        for i in hashes:
+          self.dprint(i)
 
   
   def get_av_detections(self, data: list, item: Item):

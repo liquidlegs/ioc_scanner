@@ -1,5 +1,5 @@
 from src.shared import load_config, parse_config_file, ALIEN_VAULT_KEY, ALIEN_VAULT_DISABLED, SUPRESS_WARNINGS
-from src.shared import Colour as C, Item, Dbg, check_json_error
+from src.shared import Colour as C, Item, Dbg, FeatureList, check_json_error
 import requests
 import enum, json, re
 from prettytable.colortable import ColorTable
@@ -122,7 +122,7 @@ class AlienVault(Dbg):
         
 
       if err != OtxApiErr.Nan:
-        print(f"{C.f_red('Error')}: ({C.f_cyan('AlienVault')}) {C.fd_yellow(ind)}")
+        Dbg.eprint(C.fd_yellow(ind), FeatureList.Otx)
 
       return err
     except TypeError:
@@ -419,7 +419,16 @@ class AlienVault(Dbg):
       print("\nAlienVault Results")
       print(table)
     else:
-      print("Nothing to display")
+      Dbg.eprint(
+        f"Failed to display results. Use {C.fd_cyan('--debug')} to work out what happened", 
+        FeatureList.Vt
+      )
+
+      self.dprint(f"Valid responses: {iocs}")
+      if len(iocs) > 0:
+        
+        for i in iocs:
+          self.dprint(i)
 
 
   # def get_url_quickscan(self, urls):
