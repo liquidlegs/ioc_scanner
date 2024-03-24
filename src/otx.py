@@ -342,7 +342,7 @@ class AlienVault(Dbg):
         
         tags = []
 
-        for idx in i["validation"]:
+        for idx in check_json_error(i, "validation"):
           temp_validation = check_json_error(idx, "name")
           
           if temp_validation != None and temp_validation != "":
